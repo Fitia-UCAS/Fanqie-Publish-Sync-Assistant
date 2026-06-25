@@ -50,15 +50,12 @@ class ChapterBlock:
 
 def parse_chapter_blocks(text: str) -> list[ChapterBlock]:
     normalized = normalize_chapter_line_breaks(text or "")
-    matches = list(CHAPTER_PATTERN.finditer(normalized))
+    matches = _filter_progressive_matches(list(CHAPTER_PATTERN.finditer(normalized)))
     chapters: list[ChapterBlock] = []
-    for index, match in enumerate(matches):
-        number = chinese_to_int(match.group("num"))
-        if number is None:
-            continue
+    for index, (match, number) in enumerate(matches):
         start = match.start()
         header_end = match.end()
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(normalized)
+        end = matches[index + 1][0].start() if index + 1 < len(matches) else len(normalized)
         title = match.group(0).strip()
         text_block = normalized[start:end].strip() + "\n"
         body = normalized[header_end:end].strip()
@@ -76,6 +73,28 @@ def parse_chapter_blocks(text: str) -> list[ChapterBlock]:
             )
         )
     return chapters
+
+
+def _filter_progressive_matches(matches: list) -> list[tuple]:
+    accepted: list[tuple] = []
+    last_number: int | None = None
+    for match in matches:
+        number = chinese_to_int(match.group("num"))
+        if number is None:
+            continue
+        subtitle = strip_chapter_prefix(match.group(0))
+        if _looks_like_body_reference(subtitle):
+            continue
+        if last_number is not None and number <= last_number:
+            continue
+        accepted.append((match, number))
+        last_number = number
+    return accepted
+
+
+def _looks_like_body_reference(subtitle: str) -> bool:
+    value = str(subtitle or "").lstrip()
+    return bool(value) and value[0] in "，,。！？!?；;"
 
 
 def parse_chapters_file(path: str | Path) -> list[ChapterBlock]:

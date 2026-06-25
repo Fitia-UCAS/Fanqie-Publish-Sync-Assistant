@@ -8,7 +8,7 @@ from typing import Any
 
 from backend.shared.app.app_paths import CONFIG_FILE, LEGACY_CONFIG_FILE, ensure_data_directories
 
-CONFIG_VERSION = 5
+CONFIG_VERSION = 6
 
 LEGACY_CONFIG_SECTIONS: dict[str, str] = {
     "extract_novel": "process_novel",
@@ -82,6 +82,24 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "maxRetries": 3,
         "htmlFallback": True,
         "detailedLog": False,
+    },
+    "character_material": {
+        "source": "",
+        "outputDir": "",
+        "outputFile": "",
+        "characterTarget": "",
+        "keyword": "",
+        "platform": "deepseek",
+        "apiKey": "",
+        "baseUrl": "",
+        "modelName": "",
+        "temperature": 0.2,
+        "chapter": "",
+        "start": "",
+        "end": "",
+        "allChapters": True,
+        "concurrent": True,
+        "maxWorkers": 4,
     },
 }
 

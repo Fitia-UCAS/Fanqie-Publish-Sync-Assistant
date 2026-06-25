@@ -40,7 +40,7 @@ class NamingRulesTest(unittest.TestCase):
 
     def test_adapter_directory_names_use_business_capability_nouns(self) -> None:
         adapters_dir = ROOT_DIR / "backend" / "adapters"
-        self.assertEqual(_dir_names(adapters_dir), {"fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler"})
+        self.assertEqual(_dir_names(adapters_dir), {"character_material", "fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler"})
 
     def test_fanqie_publisher_files_share_fanqie_publish_prefix(self) -> None:
         publisher_dir = ROOT_DIR / "backend" / "adapters" / "fanqie_publisher"
@@ -209,11 +209,11 @@ class NamingRulesTest(unittest.TestCase):
         self.assertEqual(_file_names(assets_dir, ".js"), {"app.js"})
         self.assertEqual({path.name for path in assets_dir.glob("*.css")}, {"styles.css"})
         core_dir = assets_dir / "core"
-        self.assertEqual(_file_names(core_dir, ".js"), {"ui_form_controls.js", "ui_novel_splitter.js", "ui_page_registry.js", "ui_state_store.js", "ui_task_panel.js"})
+        self.assertEqual(_file_names(core_dir, ".js"), {"ui_character_material.js", "ui_form_controls.js", "ui_novel_splitter.js", "ui_page_registry.js", "ui_state_store.js", "ui_task_panel.js"})
         for path in core_dir.glob("*.js"):
             self.assertTrue(path.name.startswith("ui_"), str(path))
         page_dir = assets_dir / "pages"
-        expected_pages = {"novel_processor_page.js", "fanqie_publisher_page.js", "fanqie_syncer_page.js", "novel_crawler_page.js"}
+        expected_pages = {"character_material_page.js", "novel_processor_page.js", "fanqie_publisher_page.js", "fanqie_syncer_page.js", "novel_crawler_page.js"}
         self.assertEqual(_file_names(page_dir, ".js"), expected_pages)
         for path in page_dir.glob("*.js"):
             self.assertTrue(path.name.endswith("_page.js"), str(path))
@@ -225,6 +225,7 @@ class NamingRulesTest(unittest.TestCase):
             "test_backend_architecture.py",
             "test_backend_smoke.py",
             "test_backend_novel_crawler_xsbook_adapter.py",
+            "test_backend_character_material_prompt.py",
             "test_frontend_asset_structure.py",
             "test_project_naming_rules.py",
             "test_project_package_hygiene.py",
@@ -243,7 +244,7 @@ class NamingRulesTest(unittest.TestCase):
 
     def test_data_directories_use_feature_prefixed_standard_names(self) -> None:
         data_dir = ROOT_DIR / "data"
-        self.assertEqual(_dir_names(data_dir), {"app_system", "fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler", "novel_processor"})
+        self.assertEqual(_dir_names(data_dir), {"app_system", "character_material", "fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler", "novel_processor"})
         self.assertEqual(
             _dir_names(data_dir / "app_system"),
             {"app_system_backups", "app_system_compare_reports", "app_system_debug", "app_system_history", "app_system_tasklogs"},
@@ -268,6 +269,18 @@ class NamingRulesTest(unittest.TestCase):
             _dir_names(data_dir / "novel_processor"),
             {"novel_process_backups", "novel_process_compare_reports", "novel_process_debug", "novel_process_history", "novel_process_outputs", "novel_process_tasklogs"},
         )
+        self.assertEqual(
+            _dir_names(data_dir / "character_material"),
+            {
+                "character_material_backups",
+                "character_material_chapters",
+                "character_material_compare_reports",
+                "character_material_debug",
+                "character_material_history",
+                "character_material_outputs",
+                "character_material_tasklogs",
+            },
+        )
         module_suffixes = {
             "app_system": ("app_system", {"backups", "compare_reports", "debug", "history", "tasklogs"}),
             "fanqie_publisher": ("fanqie_publish", {"backups", "compare_reports", "debug", "tracker", "tasklogs"}),
@@ -275,6 +288,7 @@ class NamingRulesTest(unittest.TestCase):
             "fanqie_web": ("fanqie_web", {"backups", "compare_reports", "debug", "history", "tasklogs"}),
             "novel_crawler": ("novel_crawl", {"backups", "compare_reports", "debug", "history", "tasklogs"}),
             "novel_processor": ("novel_process", {"backups", "compare_reports", "debug", "history", "tasklogs"}),
+            "character_material": ("character_material", {"backups", "chapters", "compare_reports", "debug", "history", "outputs", "tasklogs"}),
         }
         for module_dir, (prefix, suffixes) in module_suffixes.items():
             names = _dir_names(data_dir / module_dir)

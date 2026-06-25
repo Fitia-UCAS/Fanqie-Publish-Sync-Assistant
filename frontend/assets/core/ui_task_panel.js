@@ -37,6 +37,7 @@
         clean_text_breaks: 'novel_processor',
         auto_publish: 'fanqie_publisher',
         chapter_sync: 'fanqie_syncer',
+        character_material: 'character_material',
       };
       if (featureRootPages[page]) return this.statePath(featureRootPages[page]);
       if (page === 'web_crawler') return document.getElementById('nsOutput')?.value || this.lastOutputs.web_crawler || this.statePath('web_crawler_outputs');

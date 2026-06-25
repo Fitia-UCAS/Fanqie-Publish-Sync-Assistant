@@ -126,7 +126,7 @@ Thanks to [番茄小说全自动发文机器人](https://github.com/hchcx/fanqie
 
 # FANQIE PUBLISH SYNC ASSISTANT
 
-## 番茄发布同步助手
+## 番茄小说发布同步助手
 
 <br />
 

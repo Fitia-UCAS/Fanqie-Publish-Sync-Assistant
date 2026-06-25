@@ -15,6 +15,7 @@
       auto_publish: [],
       chapter_sync: [],
       web_crawler: [],
+      character_material: [],
     },
     logAliases: {},
     lastOutputs: {},
@@ -26,7 +27,7 @@
     resultTexts: {},
     saveTimer: null,
     statusOnlyPages: ['auto_publish', 'chapter_sync', 'web_crawler'],
-    loglessPages: ['auto_publish', 'chapter_sync', 'novel_splitter', 'process_novel_batch', 'clean_text_ads', 'clean_text_breaks'],
+    loglessPages: ['auto_publish', 'chapter_sync', 'novel_splitter', 'process_novel_batch', 'clean_text_ads', 'clean_text_breaks', 'character_material'],
 
     isStatusOnlyPage(page) { const targetPage = this.logAliases[page] || page; return this.statusOnlyPages.includes(targetPage); },
     isLoglessPage(page) { const targetPage = this.logAliases[page] || page; return this.loglessPages.includes(targetPage); },
@@ -56,6 +57,7 @@
     ...window.NovelTaskPanelMethods,
     ...window.NovelCrawlerOutputMethods,
     ...window.NovelSplitterMethods,
+    ...window.NovelCharacterMaterialMethods,
     setConfigValue(path, value) {
       if (!path) return;
       const parts = String(path).split('.').filter(Boolean);
@@ -82,6 +84,8 @@
           this.state.config.chapter_sync = this.collectPublishPayload('sy', this.state.config.chapter_sync?.operation || 'publish');
         } else if (page === 'web_crawler') {
           this.state.config.web_crawler = this.collectCrawlerConfig();
+        } else if (page === 'character_material') {
+          this.state.config.character_material = this.collectCharacterMaterialConfig();
         }
         this.state.config.activePage = this.currentPage;
         await this.api.save_config(this.state.config);
@@ -161,6 +165,7 @@
             auto_publish: [],
             chapter_sync: [],
             web_crawler: [],
+            character_material: [],
           };
           this.lastOutputs = {};
           this.lastBackups = {};
@@ -224,6 +229,7 @@
         auto_publish: window.renderFanqiePublisherPage,
         chapter_sync: window.renderFanqieSyncerPage,
         web_crawler: window.renderNovelCrawlerPage,
+        character_material: window.renderCharacterMaterialPage,
       }[this.currentPage] || window.renderNovelProcessorPage;
       document.getElementById('pageHost').innerHTML = renderer(this);
       this.bindPage(this.currentPage);
@@ -241,6 +247,7 @@
       if (page === 'auto_publish') this.bindAutoPublishPage();
       if (page === 'chapter_sync') this.bindChapterSyncPage();
       if (page === 'web_crawler') this.bindWebCrawlerPage();
+      if (page === 'character_material') this.bindCharacterMaterialPage();
       this.bindFormAutosave(page);
     },
 

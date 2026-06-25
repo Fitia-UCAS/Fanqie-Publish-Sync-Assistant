@@ -38,6 +38,15 @@ WEB_CRAWLER_HISTORY_DIR = WEB_CRAWLER_DIR / "novel_crawl_history"
 WEB_CRAWLER_LOG_DIR = WEB_CRAWLER_DIR / "novel_crawl_tasklogs"
 WEB_CRAWLER_OUTPUT_DIR = WEB_CRAWLER_DIR / "novel_crawl_outputs"
 
+CHARACTER_MATERIAL_DIR = DATA_DIR / "character_material"
+CHARACTER_MATERIAL_BACKUP_DIR = CHARACTER_MATERIAL_DIR / "character_material_backups"
+CHARACTER_MATERIAL_CHAPTER_DIR = CHARACTER_MATERIAL_DIR / "character_material_chapters"
+CHARACTER_MATERIAL_COMPARE_DIR = CHARACTER_MATERIAL_DIR / "character_material_compare_reports"
+CHARACTER_MATERIAL_DEBUG_DIR = CHARACTER_MATERIAL_DIR / "character_material_debug"
+CHARACTER_MATERIAL_HISTORY_DIR = CHARACTER_MATERIAL_DIR / "character_material_history"
+CHARACTER_MATERIAL_LOG_DIR = CHARACTER_MATERIAL_DIR / "character_material_tasklogs"
+CHARACTER_MATERIAL_OUTPUT_DIR = CHARACTER_MATERIAL_DIR / "character_material_outputs"
+
 PUBLISH_DIR = DATA_DIR / "fanqie_publisher"
 PUBLISH_BACKUP_DIR = PUBLISH_DIR / "fanqie_publish_backups"
 PUBLISH_COMPARE_DIR = PUBLISH_DIR / "fanqie_publish_compare_reports"
@@ -101,6 +110,14 @@ PROJECT_DIRECTORIES: tuple[Path, ...] = (
     PROCESS_OUTPUT_DIR,
     WEB_CRAWLER_DIR,
     WEB_CRAWLER_OUTPUT_DIR,
+    CHARACTER_MATERIAL_DIR,
+    CHARACTER_MATERIAL_BACKUP_DIR,
+    CHARACTER_MATERIAL_CHAPTER_DIR,
+    CHARACTER_MATERIAL_COMPARE_DIR,
+    CHARACTER_MATERIAL_DEBUG_DIR,
+    CHARACTER_MATERIAL_HISTORY_DIR,
+    CHARACTER_MATERIAL_LOG_DIR,
+    CHARACTER_MATERIAL_OUTPUT_DIR,
     PUBLISH_DIR,
     CHAPTER_SYNC_DIR,
     BROWSER_DATA_DIR,
@@ -113,6 +130,7 @@ LOG_CATEGORIES: dict[str, Path] = {
     "chapter_sync": CHAPTER_SYNC_LOG_DIR,
     "process_novel": PROCESS_NOVEL_LOG_DIR,
     "web_crawler": WEB_CRAWLER_LOG_DIR,
+    "character_material": CHARACTER_MATERIAL_LOG_DIR,
     "fanqie_web": FANQIE_WEB_LOG_DIR,
 }
 
@@ -145,6 +163,7 @@ def get_state_paths() -> dict[str, str]:
         "task_logs": str(DATA_DIR),
         "novel_processor": str(PROCESS_NOVEL_DIR),
         "novel_crawler": str(WEB_CRAWLER_DIR),
+        "character_material": str(CHARACTER_MATERIAL_DIR),
         "fanqie_publisher": str(PUBLISH_DIR),
         "fanqie_syncer": str(CHAPTER_SYNC_DIR),
         "system_logs": str(SYSTEM_TASK_LOG_DIR),
@@ -156,9 +175,12 @@ def get_state_paths() -> dict[str, str]:
         "chapter_sync_logs": str(CHAPTER_SYNC_LOG_DIR),
         "process_novel_logs": str(PROCESS_NOVEL_LOG_DIR),
         "web_crawler_logs": str(WEB_CRAWLER_LOG_DIR),
+        "character_material_logs": str(CHARACTER_MATERIAL_LOG_DIR),
         "fanqie_web_logs": str(FANQIE_WEB_LOG_DIR),
         "process_novel_outputs": str(PROCESS_OUTPUT_DIR),
         "web_crawler_outputs": str(WEB_CRAWLER_OUTPUT_DIR),
+        "character_material_outputs": str(CHARACTER_MATERIAL_OUTPUT_DIR),
+        "character_material_chapters": str(CHARACTER_MATERIAL_CHAPTER_DIR),
         "novel_process_outputs": str(PROCESS_OUTPUT_DIR),
         "novel_crawl_outputs": str(WEB_CRAWLER_OUTPUT_DIR),
         "fanqie_sync_tasklogs": str(CHAPTER_SYNC_LOG_DIR),
@@ -170,6 +192,10 @@ def get_state_paths() -> dict[str, str]:
         "web_crawler_compare": str(WEB_CRAWLER_COMPARE_DIR),
         "web_crawler_debug": str(WEB_CRAWLER_DEBUG_DIR),
         "web_crawler_history": str(WEB_CRAWLER_HISTORY_DIR),
+        "character_material_backups": str(CHARACTER_MATERIAL_BACKUP_DIR),
+        "character_material_compare": str(CHARACTER_MATERIAL_COMPARE_DIR),
+        "character_material_debug": str(CHARACTER_MATERIAL_DEBUG_DIR),
+        "character_material_history": str(CHARACTER_MATERIAL_HISTORY_DIR),
         "chapter_sync_backups": str(CHAPTER_SYNC_BACKUP_DIR),
         "chapter_sync_compare": str(CHAPTER_SYNC_COMPARE_DIR),
         "chapter_sync_history": str(CHAPTER_SYNC_HISTORY_DIR),

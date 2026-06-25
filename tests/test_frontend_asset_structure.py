@@ -13,6 +13,7 @@ def test_frontend_core_scripts_are_split_from_app_shell() -> None:
     assert (core_dir / "ui_task_panel.js").exists()
     assert (core_dir / "ui_state_store.js").exists()
     assert (core_dir / "ui_novel_splitter.js").exists()
+    assert (core_dir / "ui_character_material.js").exists()
     assert len((FRONTEND_DIR / "assets" / "app.js").read_text(encoding="utf-8").splitlines()) < 460
 
 
@@ -23,6 +24,7 @@ def test_frontend_page_files_use_page_object_names() -> None:
         "fanqie_publisher_page",
         "fanqie_syncer_page",
         "novel_crawler_page",
+        "character_material_page",
     }
     assert {path.stem for path in page_dir.glob("*.js")} == expected_pages
 
@@ -32,12 +34,14 @@ def test_frontend_core_scripts_load_before_app_shell() -> None:
     assert html.index("assets/core/ui_page_registry.js") < html.index("assets/app.js")
     assert html.index("assets/core/ui_state_store.js") < html.index("assets/core/ui_task_panel.js")
     assert html.index("assets/core/ui_task_panel.js") < html.index("assets/core/ui_novel_splitter.js")
-    assert html.index("assets/core/ui_novel_splitter.js") < html.index("assets/app.js")
+    assert html.index("assets/core/ui_novel_splitter.js") < html.index("assets/core/ui_character_material.js")
+    assert html.index("assets/core/ui_character_material.js") < html.index("assets/app.js")
     for page_file in [
         "novel_processor_page.js",
         "fanqie_publisher_page.js",
         "fanqie_syncer_page.js",
         "novel_crawler_page.js",
+        "character_material_page.js",
     ]:
         assert html.index(f"assets/pages/{page_file}") < html.index("assets/app.js")
 
@@ -72,6 +76,7 @@ def test_console_open_directory_uses_feature_data_roots_from_state() -> None:
     assert "clean_text_breaks: 'novel_processor'" in task_panel_js
     assert "auto_publish: 'fanqie_publisher'" in task_panel_js
     assert "chapter_sync: 'fanqie_syncer'" in task_panel_js
+    assert "character_material: 'character_material'" in task_panel_js
     assert "this.statePath('web_crawler_outputs')" in task_panel_js
     assert "this.statePath('auto_publish_logs')" not in task_panel_js
     assert "this.statePath('chapter_sync_logs')" not in task_panel_js
@@ -224,3 +229,11 @@ def test_control_fonts_share_one_weight_and_size_token() -> None:
     assert "--control-font-weight: 900" in css
     assert "font-weight: var(--control-font-weight)" in css
     assert "--control-font-weight: var(--control-font-weight)" not in css
+
+
+def test_character_material_console_is_status_only_in_ui() -> None:
+    app_js = (FRONTEND_DIR / "assets" / "app.js").read_text(encoding="utf-8")
+
+    assert "'character_material'" in app_js
+    assert "loglessPages:" in app_js
+    assert "'character_material'" in app_js.split("loglessPages:", 1)[1].split("]", 1)[0]

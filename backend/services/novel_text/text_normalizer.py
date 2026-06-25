@@ -117,11 +117,19 @@ def chinese_to_int(text: str) -> Optional[int]:
 
 
 def chapter_number_from_title(line: str) -> Optional[int]:
-    match = CHAPTER_PATTERN.match(line.strip())
+    value = line.strip()
+    match = CHAPTER_PATTERN.match(value)
     if not match:
+        return None
+    subtitle = CHAPTER_PREFIX_PATTERN.sub("", value).strip()
+    if _looks_like_body_reference(subtitle):
         return None
     return chinese_to_int(match.group("num"))
 
+
+def _looks_like_body_reference(subtitle: str) -> bool:
+    value = str(subtitle or "").lstrip()
+    return bool(value) and value[0] in "，,。！？!?；;"
 
 
 def normalize_chapter_title_line(line: str, fallback_number: Optional[int] = None) -> str:

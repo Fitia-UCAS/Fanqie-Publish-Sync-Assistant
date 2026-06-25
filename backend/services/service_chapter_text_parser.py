@@ -41,26 +41,42 @@ def parse_chapter_number(raw_number: str) -> int:
 
 def parse_chapters(text: str) -> list[Chapter]:
     lines = normalize_newlines(text).split("\n")
-    headings: list[tuple[int, int, str, str]] = []
+    candidate_headings: list[tuple[int, int, str, str]] = []
     for index, line in enumerate(lines):
         match = CHAPTER_HEADING_RE.match(line)
         if not match:
             continue
-        number = parse_chapter_number(match.group(1))
         title = match.group(2).strip()
-        headings.append((index, number, title, line.strip()))
+        if _looks_like_body_reference(title):
+            continue
+        number = parse_chapter_number(match.group(1))
+        candidate_headings.append((index, number, title, line.strip()))
+
+    headings = _filter_progressive_headings(candidate_headings)
     if not headings:
         raise ChapterParseError("没有识别到章节标题，请确认文本中存在“第N章 标题”。")
+
     chapters: list[Chapter] = []
-    seen: set[int] = set()
     for position, (line_index, number, title, raw_heading) in enumerate(headings):
-        if number in seen:
-            raise ChapterParseError(f"存在重复章节号：第{number}章")
-        seen.add(number)
         next_index = headings[position + 1][0] if position + 1 < len(headings) else len(lines)
         body = "\n".join(lines[line_index + 1:next_index]).strip()
         chapters.append(Chapter(number=number, title=title, body=body, raw_heading=raw_heading))
     return chapters
+
+
+def _looks_like_body_reference(title: str) -> bool:
+    stripped = str(title or "").lstrip()
+    return bool(stripped) and stripped[0] in "，,。！？!?；;"
+
+
+def _filter_progressive_headings(headings: list[tuple[int, int, str, str]]) -> list[tuple[int, int, str, str]]:
+    accepted: list[tuple[int, int, str, str]] = []
+    for heading in headings:
+        _line_index, number, _title, _raw_heading = heading
+        if accepted and number <= accepted[-1][1]:
+            continue
+        accepted.append(heading)
+    return accepted
 
 
 def read_chapters(file_path: str | Path | None) -> list[Chapter]:

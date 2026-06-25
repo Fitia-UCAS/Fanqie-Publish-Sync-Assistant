@@ -32,6 +32,22 @@ class ChapterParserTest(unittest.TestCase):
         self.assertIn("第1章 标题？！", format_chapters(chapters))
 
 
+    def test_parse_ignores_body_recap_chapter_reference(self) -> None:
+        text = (
+            "第980章 偷吃的小瑶瑶，众女陆续返回（额外纪元复盘）\n\n"
+            "正文。\n\n"
+            "第905章 ，圣爷与主角的再度对话中，讨论到纪元破败保留下来了人族的火种。\n\n"
+            "其实再追溯到最开始的第32章，首次提到黑雾。\n\n"
+            "第981章 下一章标题\n\n"
+            "下一章正文。\n"
+        )
+
+        chapters = parse_chapters(text)
+
+        self.assertEqual([chapter.number for chapter in chapters], [980, 981])
+        self.assertIn("第905章 ，圣爷与主角", chapters[0].body)
+
+
 class ProjectStructureTest(unittest.TestCase):
     def test_state_paths_exist(self) -> None:
         paths = get_state_paths()

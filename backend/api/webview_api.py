@@ -25,6 +25,7 @@ from backend.shared.task.task_result import TaskResult
 from backend.shared.task.task_registry import TaskRegistry
 from backend.api.desktop_api import open_file, open_native_dialog, open_path
 from backend.adapters.novel_crawler.crawler_service import NovelCrawlerService
+from backend.adapters.character_material import CharacterMaterialService
 from backend.api.frontend_api import FrontendBridge
 
 LOGGER = get_logger(__name__)
@@ -37,6 +38,7 @@ class WebviewApi:
         self._config = load_config()
         self._tasks = TaskRegistry()
         self._bridge = FrontendBridge()
+        self._character_material = CharacterMaterialService()
 
     def bind_window(self, window: Any) -> None:
         self._window = window
@@ -49,6 +51,8 @@ class WebviewApi:
             "paths": get_state_paths(),
             "platforms": {"openai": "OpenAI", "local": "本地"},
             "crawlNovelSites": NovelCrawlerService.sites(),
+            "characterMaterialPlatforms": self._character_material.platforms(),
+            "characterMaterialDefaults": {key: self._character_material.default_platform_values(key) for key in self._character_material.platforms()},
             "adProfiles": ad_profiles(),
             "logTail": self._read_log_tail(),
         }
@@ -167,6 +171,46 @@ class WebviewApi:
 
         return self._start_task("web_crawler", "web_crawler", worker)
 
+
+    def character_material_platform_defaults(self, platform: str = "deepseek") -> dict[str, Any]:
+        try:
+            values = self._character_material.default_platform_values(platform)
+            return {"ok": True, **values}
+        except Exception as exc:
+            return {"ok": False, "message": str(exc)}
+
+    def character_material_split(self, source: str) -> dict[str, Any]:
+        try:
+            path = self._character_material.split_novel(source)
+            set_config_path(self._config, "character_material.source", str(path))
+            save_config(self._config)
+            return {"ok": True, "message": f"已切分章节目录：{path}", "path": str(path), "table": self._character_material.list_chapters(path)}
+        except Exception as exc:
+            return {"ok": False, "message": str(exc)}
+
+    def character_material_list(self, source: str) -> dict[str, Any]:
+        try:
+            return {"ok": True, "message": "章节索引已读取。", "table": self._character_material.list_chapters(source)}
+        except Exception as exc:
+            return {"ok": False, "message": str(exc)}
+
+    def character_material_run(self, payload: dict[str, Any]) -> bool:
+        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
+            result = self._character_material.extract(payload, callbacks)
+            stats = result.stats.to_dict()
+            return TaskResult(
+                ok=True,
+                message=f"角色素材抽取完成：{result.output_path}",
+                path=result.output_path,
+                result_kind="output_file",
+                data={"stats": stats},
+            )
+
+        return self._start_task("character_material", "character_material", worker)
+
+    def character_material_stop(self) -> bool:
+        return self._stop_task("character_material", "character_material", "已请求停止抽取，当前章节结束后会停下。")
+
     def auto_publish_stop(self) -> bool:
         return self._stop_task("auto_publish", "auto_publish", "已请求停止发布，当前章节结束后会停下。")
 
@@ -261,6 +305,7 @@ def _log_category_for_page(page: str) -> str:
         "auto_publish": "auto_publish",
         "chapter_sync": "chapter_sync",
         "web_crawler": "web_crawler",
+        "character_material": "character_material",
         "process_novel": "process_novel",
         "process_novel_batch": "process_novel",
         "clean_text_ads": "process_novel",
