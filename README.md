@@ -1,8 +1,8 @@
 <div align="center">
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:FF512F,45:DD2476,100:7F00FF&height=230&section=header&text=FANQIE%20PUBLISH%20SYNC%20ASSISTANT&fontSize=44&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Local%20Novel%20Workflow%20Assistant&descAlignY=58&descSize=18" alt="FANQIE Novel PUBLISH ASSISTANT" />
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:FF512F,45:DD2476,100:7F00FF&height=230&section=header&text=FANQIE%20NOVEL%20PUBLISH%20SYNC%20ASSISTANT&fontSize=44&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Local%20Novel%20Workflow%20Assistant&descAlignY=58&descSize=18" alt="FANQIE Novel PUBLISH ASSISTANT" />
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=24&duration=2600&pause=700&color=FF6B6B&center=true&vCenter=true&width=900&lines=Novel+Processing+%E2%9C%A6+Fanqie+Publishing;Fanqie+Syncing+%E2%9C%A6+Web+Novel+Crawler;A+local+desktop+assistant+for+novel+workflows" alt="typing svg" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=24&duration=2600&pause=700&color=FF6B6B&center=true&vCenter=true&width=900&lines=Fanqie+Novel+Publishing;Fanqie+Novel+Syncing;A+local+desktop+assistant+for+novel+workflows" alt="typing svg" />
 
 <br />
 <br />
