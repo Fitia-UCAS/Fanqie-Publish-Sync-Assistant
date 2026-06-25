@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:FF512F,45:DD2476,100:7F00FF&height=230&section=header&text=FANQIE%20PUBLISH%20SYNC%20ASSISTANT&fontSize=44&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Local%20Novel%20Workflow%20Assistant&descAlignY=58&descSize=18" alt="FANQIE PUBLISH ASSISTANT" />
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:FF512F,45:DD2476,100:7F00FF&height=230&section=header&text=FANQIE%20PUBLISH%20SYNC%20ASSISTANT&fontSize=44&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Local%20Novel%20Workflow%20Assistant&descAlignY=58&descSize=18" alt="FANQIE Novel PUBLISH ASSISTANT" />
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=24&duration=2600&pause=700&color=FF6B6B&center=true&vCenter=true&width=900&lines=Novel+Processing+%E2%9C%A6+Fanqie+Publishing;Fanqie+Syncing+%E2%9C%A6+Web+Novel+Crawler;A+local+desktop+assistant+for+novel+workflows" alt="typing svg" />
 
@@ -10,7 +10,7 @@
 <img src="https://img.shields.io/badge/Python-Desktop%20App-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
 <img src="https://img.shields.io/badge/pywebview-Local%20UI-111827?style=for-the-badge&logo=windowsterminal&logoColor=white" alt="pywebview" />
 <img src="https://img.shields.io/badge/Playwright-Browser%20Automation-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright" />
-<img src="https://img.shields.io/badge/FANQIE-Assistant-ff4d4f?style=for-the-badge&logo=bookstack&logoColor=white" alt="Fanqie Publish Assistant" />
+<img src="https://img.shields.io/badge/FANQIE-Assistant-ff4d4f?style=for-the-badge&logo=bookstack&logoColor=white" alt="FANQIE Novel PUBLISH Assistant" />
 
 </div>
 
@@ -19,9 +19,9 @@
 <details>
 <summary>Click here —— English Introduction</summary>
 
-# FANQIE PUBLISH SYNC ASSISTANT
+# FANQIE Novel PUBLISH SYNC ASSISTANT
 
-## Fanqie Publish Sync Assistant
+## FANQIE Novel PUBLISH Sync Assistant
 
 <br />
 
@@ -48,15 +48,15 @@ Because writing novels is already tiring enough. Who on earth wants to organize 
 Simply put, it packs several common workflows into one local desktop tool:
 
 ```txt
-FANQIE PUBLISH SYNC ASSISTANT | Fanqie Publishing
-FANQIE PUBLISH SYNC ASSISTANT | Fanqie Syncing
-FANQIE PUBLISH SYNC ASSISTANT | Novel Processing
-FANQIE PUBLISH SYNC ASSISTANT | Web Crawling
+FANQIE Novel PUBLISH SYNC ASSISTANT | FANQIE Novel PUBLISHing
+FANQIE Novel PUBLISH SYNC ASSISTANT | Fanqie Syncing
+FANQIE Novel PUBLISH SYNC ASSISTANT | Novel Processing
+FANQIE Novel PUBLISH SYNC ASSISTANT | Web Crawling
 ```
 
 More specifically:
 
-* **Fanqie Publishing**: sends local chapters into the Fanqie writer backend. One less click is still one less click.
+* **FANQIE Novel PUBLISHing**: sends local chapters into the Fanqie writer backend. One less click is still one less click.
 * **Fanqie Syncing**: compares local chapters with web chapters and catches differences when something does not match.
 * **Novel Processing**: organizes TXT files, detects chapters, formats text, and splits novels by chapter, chapter count, file size, or line count.
 * **Web Crawling**: fetches chapters, saves them as TXT, and cleans up the messy stuff along the way.
@@ -124,7 +124,7 @@ Thanks to [番茄小说全自动发文机器人](https://github.com/hchcx/fanqie
 
 ---
 
-# FANQIE PUBLISH SYNC ASSISTANT
+# FANQIE Novel PUBLISH SYNC ASSISTANT
 
 ## 番茄小说发布同步助手
 
@@ -166,10 +166,10 @@ Thanks to [番茄小说全自动发文机器人](https://github.com/hchcx/fanqie
 简单来说，它把几个常用流程塞到了一个本地桌面工具里：
 
 ```txt
-FANQIE PUBLISH SYNC ASSISTANT | 番茄发布
-FANQIE PUBLISH SYNC ASSISTANT | 番茄同步
-FANQIE PUBLISH SYNC ASSISTANT | 小说处理
-FANQIE PUBLISH SYNC ASSISTANT | 网页抓取
+FANQIE Novel PUBLISH SYNC ASSISTANT | 番茄发布
+FANQIE Novel PUBLISH SYNC ASSISTANT | 番茄同步
+FANQIE Novel PUBLISH SYNC ASSISTANT | 小说处理
+FANQIE Novel PUBLISH SYNC ASSISTANT | 网页抓取
 ```
 
 至于更具体的？
