@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
@@ -9,11 +8,12 @@ from backend.adapters.adapter_factory import AdapterFactory
 from backend.shared.task.task_callbacks import TaskCallbacks
 from backend.shared.task.task_result import TaskResult
 from backend.task_logs.fanqie_task_log import FanqieTaskLog
+from backend.services.novel_text.chapter_parser import split_chapter_source_paths
 
 
 def publish_missing_chapters(payload: dict[str, Any], callbacks: TaskCallbacks | None = None) -> TaskResult:
     callbacks = callbacks or TaskCallbacks()
-    novel_file = _require_file(payload.get("novelFile"))
+    novel_file = _require_source(payload.get("novelFile"))
     url = str(payload.get("chapterManageUrl") or "").strip()
     if not url.startswith("http"):
         return TaskResult(False, "请填写番茄章节管理 URL。")
@@ -29,7 +29,6 @@ def publish_missing_chapters(payload: dict[str, Any], callbacks: TaskCallbacks |
         total=len(chapters),
     )
     concise_log.emit_start("publish", start, end)
-
     results = AdapterFactory.get_publisher().run_multi_chapter_publish(
         novel_file=novel_file,
         chapters=chapters,
@@ -40,8 +39,17 @@ def publish_missing_chapters(payload: dict[str, Any], callbacks: TaskCallbacks |
         failure_screenshots=bool(payload.get("failureScreenshots", True)),
         git_tracking=bool(payload.get("gitTracking", True)),
         clean_before_run=bool(payload.get("cleanBeforeRun", True)),
+        headless=bool(payload.get("headless", False)),
+        auth_state_path=str(payload.get("authStatePath") or ""),
+        manual_schedule_enabled=bool(payload.get("manualSchedule", False)),
+        schedule_start_date=str(payload.get("scheduleStartDate") or ""),
+        schedule_morning_time=str(payload.get("scheduleMorningTime") or "10:00"),
+        schedule_morning_count=int(payload.get("scheduleMorningCount") or 1),
+        schedule_afternoon_time=str(payload.get("scheduleAfternoonTime") or "18:00"),
+        schedule_afternoon_count=int(payload.get("scheduleAfternoonCount") or 0),
         log=concise_log.log,
         stop_requested=callbacks.stop_requested,
+        pause_requested=callbacks.pause_requested,
     )
     ok_count = sum(1 for item in results if getattr(item, "ok", False))
     concise_log.finish(ok_count, len(results))
@@ -58,14 +66,17 @@ def _chapter_range(payload: dict[str, Any]) -> tuple[int, int]:
     return start, end
 
 
-def _require_file(value: Any) -> Path:
+def _require_source(value: Any) -> Path | str:
     raw = str(value or "").strip()
     if not raw:
-        raise RuntimeError("请先选择小说 TXT 文件。")
-    path = Path(raw)
-    if not path.exists() or not path.is_file():
-        raise RuntimeError(f"请选择一个存在的小说 TXT 文件：{path}")
-    return path
+        raise RuntimeError("请先选择小说文件或章节文件夹。")
+    paths = split_chapter_source_paths(raw)
+    if not paths:
+        raise RuntimeError("请先选择小说文件或章节文件夹。")
+    missing = [path for path in paths if not path.exists()]
+    if missing:
+        raise RuntimeError(f"请选择存在的小说文件或章节文件夹：{missing[0]}")
+    return paths[0] if len(paths) == 1 else "\n".join(str(path) for path in paths)
 
 
 def _to_dict(value: Any) -> dict[str, Any]:
@@ -76,5 +87,3 @@ def _to_dict(value: Any) -> dict[str, Any]:
     else:
         return {"message": str(value)}
     return {key: str(item) if isinstance(item, Path) else item for key, item in data.items()}
-
-

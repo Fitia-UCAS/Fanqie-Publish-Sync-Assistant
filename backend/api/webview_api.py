@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 from backend.services.service_ad_cleaner import ad_profiles
-from backend.services.service_chapter_text_parser import chapters_to_preview, read_chapters
+from backend.services.service_chapter_text_parser import chapters_to_preview
+from backend.services.novel_text.chapter_parser import parse_chapter_source
+from backend.models.chapter import Chapter as PreviewChapter
 from backend.workflows.clean_text import clean_text
 from backend.workflows.crawl_web_chapters import crawl_web_chapters, preview_web_crawler_output
 from backend.workflows.process_novel import analyze_novel_file, process_novel
@@ -23,12 +25,21 @@ from backend.shared.json.json_serialization import to_json_safe
 from backend.shared.app.app_data_reset import reset_app_data, reset_login_state
 from backend.shared.task.task_result import TaskResult
 from backend.shared.task.task_registry import TaskRegistry
-from backend.api.desktop_api import open_file, open_native_dialog, open_path
+from backend.api.desktop_api import open_file, open_login_state_dialog, open_native_dialog, open_path, open_source_dialog
 from backend.adapters.novel_crawler.crawler_service import NovelCrawlerService
 from backend.adapters.character_material import CharacterMaterialService
 from backend.adapters.current_plot import CurrentPlotService
 from backend.adapters.webnovel_writer import WebnovelWriterService
 from backend.api.frontend_api import FrontendBridge
+
+
+def _get_config_path(config: dict[str, Any], dotted_path: str) -> str:
+    value: Any = config
+    for part in str(dotted_path or '').split('.'):
+        if not isinstance(value, dict) or part not in value:
+            return ''
+        value = value.get(part)
+    return str(value or '')
 
 LOGGER = get_logger(__name__)
 
@@ -86,6 +97,22 @@ class WebviewApi:
             save_config(self._config)
         return path
 
+    def choose_source(self, config_path: str = "") -> str:
+        current = _get_config_path(self._config, config_path)
+        path = open_source_dialog(self._window, current_path=current)
+        if path and config_path:
+            set_config_path(self._config, config_path, path)
+            save_config(self._config)
+        return path
+
+    def choose_login_state(self, config_path: str = "") -> str:
+        current = _get_config_path(self._config, config_path)
+        path = open_login_state_dialog(self._window, current_path=current)
+        if path and config_path:
+            set_config_path(self._config, config_path, path)
+            save_config(self._config)
+        return path
+
     def choose_directory(self, config_path: str = "") -> str:
         return self.choose_folder(config_path)
 
@@ -108,13 +135,14 @@ class WebviewApi:
         return FANQIE_AUTH_STATE_FILE.exists()
 
     def do_login(self) -> bool:
-        self._bridge.emit_log("auto_publish", "请在下一次自动打开的浏览器中完成登录；登录成功后会保存到 data/fanqie_web/state.json。", "info")
+        self._bridge.emit_log("auto_publish", "请在下一次自动打开的浏览器中完成登录；登录成功后会保存到当前账号的 state JSON。", "info")
         return True
 
     def reset_login(self) -> dict[str, Any]:
         result = reset_login_state()
         self._bridge.emit_log("auto_publish", str(result.get("message") or "已重置授权。"), "warning" if result.get("ok") else "error")
         return result
+
 
     def reset_app_data(self) -> dict[str, Any]:
         result = reset_app_data(preserve_auth_state=True)
@@ -338,13 +366,29 @@ class WebviewApi:
     def chapter_sync_stop(self) -> bool:
         return self._stop_task("chapter_sync", "chapter_sync", "已请求停止同步，当前章节结束后会停下。")
 
+    def auto_publish_pause(self) -> bool:
+        return self._pause_task("auto_publish", "auto_publish", "已暂停发布。")
+
+    def auto_publish_resume(self) -> bool:
+        return self._resume_task("auto_publish", "auto_publish", "已继续发布。")
+
+    def chapter_sync_pause(self) -> bool:
+        return self._pause_task("chapter_sync", "chapter_sync", "已暂停同步。")
+
+    def chapter_sync_resume(self) -> bool:
+        return self._resume_task("chapter_sync", "chapter_sync", "已继续同步。")
+
     def web_crawler_stop(self) -> bool:
         return self._stop_task("web_crawler", "web_crawler", "已请求停止爬取，正在取消未开始的章节。")
 
     def _list_chapters(self, file_path: str) -> dict[str, Any]:
         try:
-            chapters = read_chapters(file_path)
-            return {"ok": True, "message": f"已识别 {len(chapters)} 个章节。", "chapters": chapters_to_preview(chapters)}
+            chapters = parse_chapter_source(file_path)
+            preview = [
+                PreviewChapter(number=chapter.number, title=chapter.subtitle, body=chapter.content, raw_heading=chapter.full_title).to_preview()
+                for chapter in chapters
+            ]
+            return {"ok": True, "message": f"已识别 {len(chapters)} 个章节。", "chapters": preview}
         except Exception as exc:
             return {"ok": False, "message": str(exc), "chapters": []}
 
@@ -361,6 +405,21 @@ class WebviewApi:
             self._bridge.emit_log(page, "当前没有正在运行的任务。", "warning")
             return False
         self._bridge.emit_log(page, message, "warning")
+        return True
+
+
+    def _pause_task(self, task_name: str, page: str, message: str) -> bool:
+        if not self._tasks.request_pause(task_name):
+            self._bridge.emit_log(page, "当前没有正在运行的任务。", "warning")
+            return False
+        self._bridge.emit_log(page, message, "warning")
+        return True
+
+    def _resume_task(self, task_name: str, page: str, message: str) -> bool:
+        if not self._tasks.request_resume(task_name):
+            self._bridge.emit_log(page, "当前没有正在运行的任务。", "warning")
+            return False
+        self._bridge.emit_log(page, message, "success")
         return True
 
     def _run_worker(self, task_name: str, page: str, worker: Callable[[TaskCallbacks], TaskResult | dict[str, Any]]) -> None:
@@ -384,10 +443,14 @@ class WebviewApi:
         def should_stop() -> bool:
             return self._tasks.is_stop_requested(task_name)
 
+        def should_pause() -> bool:
+            return self._tasks.is_pause_requested(task_name)
+
         callbacks = TaskCallbacks(
             log=emit_log,
             progress=emit_progress,
             should_stop=should_stop,
+            should_pause=should_pause,
             event=emit_event,
         )
         try:

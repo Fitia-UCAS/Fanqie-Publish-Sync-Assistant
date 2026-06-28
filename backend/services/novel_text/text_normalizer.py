@@ -15,11 +15,11 @@ INLINE_CHAPTER_PATTERN = re.compile(
     rf"第\s*(?P<num>{CHAPTER_NUM_FRAGMENT})\s*章(?![的中内外里节回项条])"
 )
 CHAPTER_TITLE_PATTERN = re.compile(
-    rf"^第\s*(?P<num>{CHAPTER_NUM_FRAGMENT})\s*章(?![的中内外里节回项条])[ \t]*(?P<title>.*?)\s*$",
+    rf"^(?:#{{1,6}}\s*)?第\s*(?P<num>{CHAPTER_NUM_FRAGMENT})\s*章(?![的中内外里节回项条])[ \t]*(?P<title>.*?)\s*$",
     re.MULTILINE,
 )
 CHAPTER_PREFIX_PATTERN = re.compile(
-    rf"^第\s*({CHAPTER_NUM_FRAGMENT})\s*章(?![的中内外里节回项条])[ \t]*"
+    rf"^(?:#{{1,6}}\s*)?第\s*({CHAPTER_NUM_FRAGMENT})\s*章(?![的中内外里节回项条])[ \t]*"
 )
 CN_DIGITS = {
     "零": 0,
@@ -64,9 +64,12 @@ def normalize_chapter_line_breaks(text: str) -> str:
     split_before_chars = set(" \t　。！？!?；;，,、：:…）)]】》」』”\"'")
 
     def _split(match: re.Match[str]) -> str:
-
         start = match.start()
         if start == 0 or normalized[start - 1] == "\n":
+            return match.group(0)
+        line_start = normalized.rfind("\n", 0, start) + 1
+        prefix = normalized[line_start:start]
+        if re.match(r"^[ \t　]*#{1,6}\s*$", prefix) or CHAPTER_PATTERN.match(prefix):
             return match.group(0)
         previous_char = normalized[start - 1]
         if previous_char in split_before_chars or previous_char.isspace():

@@ -12,6 +12,7 @@ from backend.adapters.fanqie_publisher.fanqie_publish_options import ChapterPubl
 from backend.adapters.fanqie_publisher.fanqie_publish_single_runner import run_single_chapter_publish
 from backend.adapters.fanqie_publisher.fanqie_publish_verifier import wait_for_chapter_list_word_counts
 from backend.adapters.fanqie_web.browser.browser_session import close_context, make_context, save_failure_debug
+from backend.adapters.fanqie_web.models import build_schedule_slots, describe_schedule_slots
 from backend.shared.app.app_paths import PUBLISH_DEBUG_DIR, PUBLISH_TRACKER_DIR
 from backend.shared.app.app_runtime_defaults import DEFAULT_CHAPTER_MANAGE_URL
 
@@ -27,8 +28,17 @@ def run_multi_chapter_publish(
     failure_screenshots: bool = True,
     git_tracking: bool = True,
     clean_before_run: bool = True,
+    headless: bool = False,
+    auth_state_path: str = "",
+    manual_schedule_enabled: bool = False,
+    schedule_start_date: str = "",
+    schedule_morning_time: str = "10:00",
+    schedule_morning_count: int = 1,
+    schedule_afternoon_time: str = "18:00",
+    schedule_afternoon_count: int = 0,
     log: Callable[[str], None] = print,
     stop_requested: Callable[[], bool] | None = None,
+    pause_requested: Callable[[], bool] | None = None,
 ) -> list[ChapterPublishResult]:
     options = make_chapter_publish_options(
         chapter_manage_url=chapter_manage_url,
@@ -38,8 +48,19 @@ def run_multi_chapter_publish(
         failure_screenshots=failure_screenshots,
         git_tracking=git_tracking,
         clean_before_run=clean_before_run,
+        headless=headless,
+        auth_state_path=auth_state_path,
+        schedule_slots=build_schedule_slots(
+            chapters,
+            enabled=manual_schedule_enabled,
+            start_date=schedule_start_date,
+            morning_time=schedule_morning_time,
+            morning_count=schedule_morning_count,
+            afternoon_time=schedule_afternoon_time,
+            afternoon_count=schedule_afternoon_count,
+        ),
     )
-    return run_multi_chapter_publish_with_options(novel_file=novel_file, chapters=chapters, options=options, log=log, stop_requested=stop_requested)
+    return run_multi_chapter_publish_with_options(novel_file=novel_file, chapters=chapters, options=options, log=log, stop_requested=stop_requested, pause_requested=pause_requested)
 
 
 def run_multi_chapter_publish_with_options(
@@ -49,6 +70,7 @@ def run_multi_chapter_publish_with_options(
     options: ChapterPublishOptions,
     log: Callable[[str], None] = print,
     stop_requested: Callable[[], bool] | None = None,
+    pause_requested: Callable[[], bool] | None = None,
 ) -> list[ChapterPublishResult]:
     local_chapters = load_local_chapters_by_number(novel_file, chapters)
     if options.clean_before_run:
@@ -64,14 +86,21 @@ def run_multi_chapter_publish_with_options(
     else:
         log("番茄发布 Git追踪已关闭。")
     log("番茄发布流程：不会定位/读取既有章节，将按本地范围直接新建章节。")
+    schedule_desc = describe_schedule_slots(options.schedule_slots)
+    if schedule_desc:
+        log(schedule_desc)
 
-    p, context, page = make_context(headless=False, debug_category="auto_publish", debug_enabled=options.debug_screenshots, failure_debug_enabled=options.failure_screenshots)
+    p, context, page = make_context(headless=options.headless, debug_category="auto_publish", debug_enabled=options.debug_screenshots, failure_debug_enabled=options.failure_screenshots, auth_state_path=options.auth_state_path)
     results: list[ChapterPublishResult] = []
     try:
         if not chapters:
             log("没有需要处理的章节。")
         per_chapter_options = replace(options, verify_after_publish=False) if options.verify_after_publish else options
         for index, chapter_no in enumerate(chapters, start=1):
+            if _stop_requested(stop_requested):
+                log("已停止发布。")
+                break
+            _wait_while_paused(pause_requested=pause_requested, stop_requested=stop_requested, log=log, label="发布")
             if _stop_requested(stop_requested):
                 log("已停止发布。")
                 break
@@ -170,3 +199,21 @@ def _mark_list_verify_failures(
 
 def _stop_requested(stop_requested: Callable[[], bool] | None) -> bool:
     return bool(stop_requested and stop_requested())
+
+
+def _wait_while_paused(
+    *,
+    pause_requested: Callable[[], bool] | None,
+    stop_requested: Callable[[], bool] | None,
+    log: Callable[[str], None],
+    label: str,
+) -> None:
+    announced = False
+    import time
+    while pause_requested and pause_requested():
+        if _stop_requested(stop_requested):
+            return
+        if not announced:
+            log(f"{label}已暂停，点击继续后会处理下一章。")
+            announced = True
+        time.sleep(0.5)

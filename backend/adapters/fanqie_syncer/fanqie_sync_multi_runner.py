@@ -14,6 +14,7 @@ from backend.adapters.fanqie_syncer.fanqie_sync_preflight import wait_for_chapte
 from backend.adapters.fanqie_web.browser.browser_session import close_context, make_context, save_failure_debug
 from backend.adapters.fanqie_web.page_actions.chapter_page_interactions import dismiss_popups, goto_chapter_manage
 from backend.adapters.fanqie_web.pages.chapter_list_page import build_chapter_editor_index
+from backend.adapters.fanqie_web.models import build_schedule_slots, describe_schedule_slots
 from backend.services.novel_text.chapter_parser import chapters_by_number
 from backend.shared.app.app_paths import CHAPTER_SYNC_COMPARE_DIR, CHAPTER_SYNC_DEBUG_DIR, CHAPTER_SYNC_HISTORY_DIR
 from backend.shared.app.app_runtime_defaults import DEFAULT_CHAPTER_MANAGE_URL
@@ -32,7 +33,16 @@ def run_multi_chapter_sync(
     failure_screenshots: bool = True,
     git_tracking: bool = True,
     clean_before_run: bool = True,
+    headless: bool = False,
+    auth_state_path: str = "",
+    manual_schedule_enabled: bool = False,
+    schedule_start_date: str = "",
+    schedule_morning_time: str = "10:00",
+    schedule_morning_count: int = 1,
+    schedule_afternoon_time: str = "18:00",
+    schedule_afternoon_count: int = 0,
     stop_requested: Callable[[], bool] | None = None,
+    pause_requested: Callable[[], bool] | None = None,
 ) -> list[ChapterSyncResult]:
     options = make_chapter_sync_options(
         chapter_manage_url=chapter_manage_url,
@@ -44,6 +54,17 @@ def run_multi_chapter_sync(
         failure_screenshots=failure_screenshots,
         git_tracking=git_tracking,
         clean_before_run=clean_before_run,
+        headless=headless,
+        auth_state_path=auth_state_path,
+        schedule_slots=build_schedule_slots(
+            chapters,
+            enabled=manual_schedule_enabled and direction == "local_to_remote" and not check_only,
+            start_date=schedule_start_date,
+            morning_time=schedule_morning_time,
+            morning_count=schedule_morning_count,
+            afternoon_time=schedule_afternoon_time,
+            afternoon_count=schedule_afternoon_count,
+        ),
     )
     if options.clean_before_run:
         _clean_previous_sync_artifacts(log=log)
@@ -57,8 +78,11 @@ def run_multi_chapter_sync(
         log(f"番茄同步 Git追踪已开启：{CHAPTER_SYNC_HISTORY_DIR}")
     else:
         log("番茄同步 Git追踪已关闭。")
+    schedule_desc = describe_schedule_slots(options.schedule_slots)
+    if schedule_desc:
+        log(schedule_desc)
 
-    p, context, page = make_context(headless=False, debug_category="chapter_sync", debug_enabled=options.debug_screenshots, failure_debug_enabled=options.failure_screenshots)
+    p, context, page = make_context(headless=options.headless, debug_category="chapter_sync", debug_enabled=options.debug_screenshots, failure_debug_enabled=options.failure_screenshots, auth_state_path=options.auth_state_path)
     state = MultiChapterSyncState(chapters=list(chapters), results=[], result_chapter_numbers=[])
     try:
         local_chapters = _local_chapters_by_number(novel_file, chapters)
@@ -85,6 +109,7 @@ def run_multi_chapter_sync(
             state=state,
             log=log,
             stop_requested=stop_requested,
+            pause_requested=pause_requested,
         )
         if not _stop_requested(stop_requested):
             _final_list_verify_if_needed(
@@ -137,10 +162,10 @@ def _clean_previous_sync_artifacts(*, log: Callable[[str], None]) -> None:
 
 
 def _local_chapters_by_number(novel_file: Path, chapters: list[int]) -> dict[int, Chapter]:
-    local_chapters = chapters_by_number(parse_chapters(novel_file), "本地 txt")
+    local_chapters = chapters_by_number(parse_chapters(novel_file), "本地小说来源")
     missing_local = [no for no in chapters if no not in local_chapters]
     if missing_local:
-        raise RuntimeError(f"本地 txt 中没有找到章节：{', '.join(str(no) for no in missing_local)}")
+        raise RuntimeError(f"本地小说来源中没有找到章节：{', '.join(str(no) for no in missing_local)}")
     return local_chapters
 
 
@@ -176,6 +201,7 @@ def _process_chapters(
     state: MultiChapterSyncState,
     log: Callable[[str], None],
     stop_requested: Callable[[], bool] | None = None,
+    pause_requested: Callable[[], bool] | None = None,
 ) -> None:
     process_total = len(chapters)
     created_chapter_numbers: set[int] = set()
@@ -185,6 +211,10 @@ def _process_chapters(
         else base_options
     )
     for index, chapter_no in enumerate(chapters, start=1):
+        if _stop_requested(stop_requested):
+            log("已停止同步。")
+            break
+        _wait_while_paused(pause_requested=pause_requested, stop_requested=stop_requested, log=log, label="同步")
         if _stop_requested(stop_requested):
             log("已停止同步。")
             break
@@ -273,3 +303,21 @@ def _mark_list_verify_failures(*, failures: dict[int, str], state: MultiChapterS
 
 def _stop_requested(stop_requested: Callable[[], bool] | None) -> bool:
     return bool(stop_requested and stop_requested())
+
+
+def _wait_while_paused(
+    *,
+    pause_requested: Callable[[], bool] | None,
+    stop_requested: Callable[[], bool] | None,
+    log: Callable[[str], None],
+    label: str,
+) -> None:
+    announced = False
+    import time
+    while pause_requested and pause_requested():
+        if _stop_requested(stop_requested):
+            return
+        if not announced:
+            log(f"{label}已暂停，点击继续后会处理下一章。")
+            announced = True
+        time.sleep(0.5)

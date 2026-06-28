@@ -62,6 +62,8 @@
     ...window.NovelCharacterMaterialMethods,
     ...window.NovelCurrentPlotMethods,
     ...window.NovelWebnovelWriterMethods,
+    ...window.NovelFanqieAccountMethods,
+    ...window.NovelFanqieTaskMethods,
     setConfigValue(path, value) {
       if (!path) return;
       const parts = String(path).split('.').filter(Boolean);
@@ -342,49 +344,6 @@
       if (!this.api[apiName]) return this.toast('当前版本不支持停止任务。', 'warning', page);
       const ok = await this.api[apiName]();
       if (!ok) this.toast('当前没有正在运行的任务。', 'warning', page);
-    },
-
-    bindAutoPublishPage() {
-      this.bindChooseFile('apChooseNovel', 'auto_publish.novelFile', 'apNovelFile', '选择完整小说 TXT');
-      document.querySelectorAll('[data-auto-op]').forEach((button) => button.addEventListener('click', () => this.runAutoPublish(button.dataset.autoOp)));
-      document.getElementById('apStop')?.addEventListener('click', () => this.stopTask('auto_publish_stop', 'auto_publish'));
-    },
-    async runAutoPublish(operation) {
-      const payload = this.collectPublishPayload('ap', operation);
-      this.state.config.auto_publish = payload;
-      await this.saveConfig();
-      this.beginTaskUi('auto_publish', '准备启动番茄发布...');
-      const ok = await this.api.auto_publish_run(payload);
-      if (!ok) this.toast('任务没有启动，请查看日志。', 'warning', 'auto_publish');
-    },
-
-    bindChapterSyncPage() {
-      this.bindChooseFile('syChooseNovel', 'chapter_sync.novelFile', 'syNovelFile', '选择完整小说 TXT');
-      document.querySelectorAll('[data-sync-op]').forEach((button) => button.addEventListener('click', () => this.runChapterSync(button.dataset.syncOp)));
-      document.getElementById('syStop')?.addEventListener('click', () => this.stopTask('chapter_sync_stop', 'chapter_sync'));
-    },
-    async runChapterSync(operation) {
-      const payload = this.collectPublishPayload('sy', operation);
-      this.state.config.chapter_sync = payload;
-      await this.saveConfig();
-      this.beginTaskUi('chapter_sync', '准备启动番茄同步...');
-      const ok = await this.api.chapter_sync_run(payload);
-      if (!ok) this.toast('任务没有启动，请查看日志。', 'warning', 'chapter_sync');
-    },
-    collectPublishPayload(prefix, operation) {
-      return {
-        novelFile: document.getElementById(`${prefix}NovelFile`)?.value || '',
-        chapterManageUrl: document.getElementById(`${prefix}Url`)?.value || '',
-        start: Number(document.getElementById(`${prefix}Start`)?.value || 1),
-        end: Number(document.getElementById(`${prefix}End`)?.value || 1),
-        useAi: !!document.getElementById(`${prefix}UseAi`)?.checked,
-        verifyAfterPublish: !!document.getElementById(`${prefix}VerifyAfterPublish`)?.checked,
-        debugScreenshots: !!document.getElementById(`${prefix}DebugScreenshots`)?.checked,
-        failureScreenshots: !!document.getElementById(`${prefix}FailureScreenshots`)?.checked,
-        gitTracking: !!document.getElementById(`${prefix}GitTracking`)?.checked,
-        cleanBeforeRun: !!document.getElementById(`${prefix}CleanBeforeRun`)?.checked,
-        operation,
-      };
     },
 
     bindWebCrawlerPage() {

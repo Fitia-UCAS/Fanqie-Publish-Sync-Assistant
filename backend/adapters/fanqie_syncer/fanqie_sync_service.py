@@ -25,6 +25,14 @@ def run_chapter_sync(
     failure_screenshots: bool = True,
     git_tracking: bool = True,
     clean_before_run: bool = True,
+    headless: bool = False,
+    auth_state_path: str = "",
+    manual_schedule_enabled: bool = False,
+    schedule_start_date: str = "",
+    schedule_morning_time: str = "10:00",
+    schedule_morning_count: int = 1,
+    schedule_afternoon_time: str = "18:00",
+    schedule_afternoon_count: int = 0,
     stop_requested: Callable[[], bool] | None = None,
 ) -> ChapterSyncResult:
     options = make_chapter_sync_options(
@@ -37,8 +45,10 @@ def run_chapter_sync(
         failure_screenshots=failure_screenshots,
         git_tracking=git_tracking,
         clean_before_run=clean_before_run,
+        headless=headless,
+        auth_state_path=auth_state_path,
     )
-    p, context, page = make_context(headless=False, debug_category="chapter_sync", debug_enabled=debug_screenshots, failure_debug_enabled=failure_screenshots)
+    p, context, page = make_context(headless=headless, debug_category="chapter_sync", debug_enabled=debug_screenshots, failure_debug_enabled=failure_screenshots, auth_state_path=auth_state_path)
     try:
         return run_single_chapter_sync(page=page, novel_file=novel_file, chapter_no=chapter_no, options=options, log=log)
     finally:

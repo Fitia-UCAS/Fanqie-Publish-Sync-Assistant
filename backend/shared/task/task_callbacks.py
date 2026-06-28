@@ -8,6 +8,7 @@ from backend.shared.task.task_event import TaskEvent
 LogCallback = Callable[[str, str], None]
 ProgressCallback = Callable[[float, float], None]
 StopCallback = Callable[[], bool]
+PauseCallback = Callable[[], bool]
 EventCallback = Callable[[TaskEvent], None]
 
 
@@ -16,6 +17,7 @@ class TaskCallbacks:
     log: LogCallback | None = None
     progress: ProgressCallback | None = None
     should_stop: StopCallback | None = None
+    should_pause: PauseCallback | None = None
     event: EventCallback | None = None
 
     def emit_log(self, message: str, level: str = "info") -> None:
@@ -32,3 +34,6 @@ class TaskCallbacks:
 
     def stop_requested(self) -> bool:
         return bool(self.should_stop and self.should_stop())
+
+    def pause_requested(self) -> bool:
+        return bool(self.should_pause and self.should_pause())

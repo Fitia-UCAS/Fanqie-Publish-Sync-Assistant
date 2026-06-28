@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from backend.adapters.fanqie_syncer.fanqie_sync_models import ChapterSyncOptions
+from backend.adapters.fanqie_web.models import ScheduledPublishSlot
 
 
 def make_chapter_sync_options(
@@ -14,6 +15,9 @@ def make_chapter_sync_options(
     failure_screenshots: bool,
     git_tracking: bool,
     clean_before_run: bool,
+    headless: bool = False,
+    auth_state_path: str = "",
+    schedule_slots: dict[int, ScheduledPublishSlot] | None = None,
 ) -> ChapterSyncOptions:
     return ChapterSyncOptions(
         chapter_manage_url=chapter_manage_url,
@@ -25,4 +29,7 @@ def make_chapter_sync_options(
         failure_screenshots=failure_screenshots,
         git_tracking=git_tracking,
         clean_before_run=clean_before_run,
+        headless=headless,
+        auth_state_path=auth_state_path,
+        schedule_slots=dict(schedule_slots or {}),
     )

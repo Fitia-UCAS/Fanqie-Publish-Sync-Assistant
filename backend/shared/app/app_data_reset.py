@@ -19,6 +19,8 @@ from backend.shared.app.app_paths import (
     CHARACTER_MATERIAL_DIR,
     DATA_DIR,
     FANQIE_AUTH_STATE_FILE,
+    FANQIE_ACCOUNTS_FILE,
+    FANQIE_ACCOUNT_STATES_DIR,
     LEGACY_COMMON_DIR,
     PROCESS_NOVEL_DIR,
     PUBLISH_DIR,
@@ -49,7 +51,7 @@ def reset_login_state() -> dict[str, Any]:
     removed: list[str] = []
     errors: list[str] = []
     _repair_project_permissions_once()
-    targets = [FANQIE_AUTH_STATE_FILE, BROWSER_DATA_DIR / "browser_edge_profile"]
+    targets = [FANQIE_AUTH_STATE_FILE, FANQIE_ACCOUNT_STATES_DIR, BROWSER_DATA_DIR / "browser_edge_profile"]
     for target in targets:
         _remove_path(target, removed=removed, errors=errors)
     ensure_data_directories()
@@ -79,7 +81,11 @@ def reset_runtime_data(*, preserve_auth_state: bool = True) -> dict[str, Any]:
 
     if BROWSER_DATA_DIR.exists():
         for child in list(BROWSER_DATA_DIR.iterdir()):
-            if preserve_auth_state and _same_path(child, FANQIE_AUTH_STATE_FILE):
+            if preserve_auth_state and (
+                _same_path(child, FANQIE_AUTH_STATE_FILE)
+                or _same_path(child, FANQIE_ACCOUNTS_FILE)
+                or _same_path(child, FANQIE_ACCOUNT_STATES_DIR)
+            ):
                 continue
             _remove_path(child, removed=removed, errors=errors)
 

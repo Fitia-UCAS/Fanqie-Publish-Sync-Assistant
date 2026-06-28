@@ -63,7 +63,7 @@ def run_single_chapter_publish(
     save_debug(editor_page, f"chapter_{chapter_no:03d}_after_save")
 
     log("正在进入发布流程：点击右上角“下一步”，并处理错别字/AI 设置/确认发布弹窗...")
-    publish_after_save(editor_page, use_ai=options.use_ai, log=log)
+    publish_after_save(editor_page, use_ai=options.use_ai, log=log, scheduled_slot=options.schedule_for(chapter_no))
     save_debug(editor_page, f"chapter_{chapter_no:03d}_after_publish")
     if options.verify_after_publish:
         verify_single_list_count(editor_page, chapter_no=chapter_no, chapter_manage_url=options.chapter_manage_url, local=local, log=log)

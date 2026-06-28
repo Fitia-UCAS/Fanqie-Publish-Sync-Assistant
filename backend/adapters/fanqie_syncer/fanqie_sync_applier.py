@@ -126,7 +126,7 @@ def apply_local_to_remote(
     save_debug(page, "after_save")
 
     log("正在进入同步提交流程：点击右上角“下一步”，并处理错别字/AI 设置/确认弹窗...")
-    submit_after_sync_save(page, use_ai=options.use_ai, log=log)
+    submit_after_sync_save(page, use_ai=options.use_ai, log=log, scheduled_slot=options.schedule_for(chapter_no))
     save_debug(page, "after_sync_submit")
     if options.verify_after_publish:
         verify_single_list_count(

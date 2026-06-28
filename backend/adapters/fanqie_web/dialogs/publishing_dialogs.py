@@ -389,6 +389,34 @@ def ensure_scheduled_publish_at_10(
     return scheduled_date
 
 
+
+def ensure_scheduled_publish(
+    page: Page,
+    *,
+    scheduled_date: str,
+    scheduled_time: str,
+    log: Callable[[str], None] = print,
+) -> str:
+    save_debug(page, "schedule_publish_manual_before")
+    if not _ensure_scheduled_publish_switch_on(page):
+        save_debug(page, "schedule_publish_manual_toggle_failed", force=True)
+        raise RuntimeError("未能打开“定时发布”开关。")
+    if not _mark_scheduled_publish_date_target(page):
+        save_debug(page, "schedule_publish_manual_date_input_not_found", force=True)
+        raise RuntimeError("未能定位“定时发布”的日期输入框。")
+    _click_and_fill_scheduled_publish_date(page, scheduled_date=scheduled_date)
+    _choose_date_picker_value(page, scheduled_date=scheduled_date)
+    _force_scheduled_publish_date_value(page, scheduled_date=scheduled_date)
+    if not _mark_scheduled_publish_time_target(page):
+        save_debug(page, "schedule_publish_manual_time_input_not_found", force=True)
+        raise RuntimeError("未能定位“定时发布”的时间输入框。")
+    _click_and_fill_scheduled_publish_time(page, scheduled_time=scheduled_time)
+    _choose_time_picker_value(page, scheduled_time=scheduled_time)
+    _force_scheduled_publish_time_value(page, scheduled_time=scheduled_time)
+    save_debug(page, "schedule_publish_manual_set")
+    log(f"已设置定时发布：{scheduled_date} {scheduled_time}。")
+    return scheduled_date
+
 def _ensure_scheduled_publish_switch_on(page: Page) -> bool:
     script = r'''
     () => {

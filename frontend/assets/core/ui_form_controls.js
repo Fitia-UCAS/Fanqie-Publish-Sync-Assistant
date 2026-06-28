@@ -9,7 +9,9 @@
     basename(path) {
       const text = String(path || '').trim();
       if (!text) return '';
-      const cleaned = text.replace(/[\\/]+$/, '');
+      const items = text.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+      if (items.length > 1) return `${items.length} 个文件`;
+      const cleaned = items[0].replace(/[\\/]+$/, '');
       const parts = cleaned.split(/[\\/]+/);
       return parts[parts.length - 1] || cleaned;
     },

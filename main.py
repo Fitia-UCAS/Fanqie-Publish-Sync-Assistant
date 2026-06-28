@@ -27,6 +27,7 @@ def hide_child_console_windows() -> None:
         return
 
     original_popen = subprocess.Popen
+    subprocess._fanqie_original_popen = original_popen
 
     def hidden_popen(*args, **kwargs):
         startupinfo = kwargs.get("startupinfo") or subprocess.STARTUPINFO()

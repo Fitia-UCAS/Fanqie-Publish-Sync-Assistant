@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from playwright.sync_api import Page
 
+from backend.adapters.fanqie_web.models import ScheduledPublishSlot
+
 from backend.adapters.fanqie_web.page_actions.chapter_page_interactions import locator_count_safe
 from backend.adapters.fanqie_web.browser.browser_session import save_debug
 from backend.adapters.fanqie_web.dialogs.publishing_dialogs import (
@@ -10,6 +12,7 @@ from backend.adapters.fanqie_web.dialogs.publishing_dialogs import (
     click_confirm_publish,
     daily_submit_limit_visible,
     ensure_scheduled_publish_at_10,
+    ensure_scheduled_publish,
     publish_settings_visible,
 )
 from backend.adapters.fanqie_web.dialogs.editing_dialogs import click_continue_edit_if_present, click_typo_submit_if_present
@@ -147,7 +150,7 @@ def click_sync_next_step(page: Page, log=print) -> None:
     save_debug(page, "sync_next_step_failed", force=True)
     raise RuntimeError("点击“下一步”后仍未检测到提交设置弹窗，可能被页面校验/保存状态拦截。")
 
-def submit_after_sync_save(page: Page, use_ai: bool = False, log=print) -> None:
+def submit_after_sync_save(page: Page, use_ai: bool = False, log=print, scheduled_slot: ScheduledPublishSlot | None = None) -> None:
     save_debug(page, "sync_submit_flow_start")
     click_sync_next_step(page, log=log)
 
@@ -167,7 +170,9 @@ def submit_after_sync_save(page: Page, use_ai: bool = False, log=print) -> None:
 
         if publish_settings_visible(page):
             save_debug(page, f"sync_settings_visible_round_{round_no}")
-            if daily_submit_limit_visible(page):
+            if scheduled_slot is not None:
+                ensure_scheduled_publish(page, scheduled_date=scheduled_slot.date, scheduled_time=scheduled_slot.time, log=log)
+            elif daily_submit_limit_visible(page):
                 if daily_limit_reschedule_attempts >= 31:
                     raise RuntimeError("检测到每日提交字数上限，已连续尝试向后顺延 31 次定时发布日期，仍未通过。")
                 date_increment_days = daily_limit_reschedule_attempts + 1

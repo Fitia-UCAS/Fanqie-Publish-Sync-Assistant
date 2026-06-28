@@ -83,6 +83,8 @@ FANQIE_WEB_DEBUG_DIR = BROWSER_DATA_DIR / "fanqie_web_debug"
 FANQIE_WEB_HISTORY_DIR = BROWSER_DATA_DIR / "fanqie_web_history"
 FANQIE_WEB_LOG_DIR = BROWSER_DATA_DIR / "fanqie_web_tasklogs"
 FANQIE_AUTH_STATE_FILE = BROWSER_DATA_DIR / "state.json"
+FANQIE_ACCOUNTS_FILE = BROWSER_DATA_DIR / "accounts.json"
+FANQIE_ACCOUNT_STATES_DIR = BROWSER_DATA_DIR / "states"
 
 STANDARD_DATA_DIRECTORIES: tuple[Path, ...] = (
     APP_SYSTEM_BACKUP_DIR,
@@ -246,6 +248,8 @@ def get_state_paths() -> dict[str, str]:
         "fanqie_web_history": str(FANQIE_WEB_HISTORY_DIR),
         "debug": str(CHAPTER_SYNC_DEBUG_DIR),
         "fanqie_auth_state": str(FANQIE_AUTH_STATE_FILE),
+        "fanqie_accounts_file": str(FANQIE_ACCOUNTS_FILE),
+        "fanqie_account_states": str(FANQIE_ACCOUNT_STATES_DIR),
     }
 
 

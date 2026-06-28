@@ -24,8 +24,17 @@ class ChapterPublisher(Protocol):
         failure_screenshots: bool = True,
         git_tracking: bool = True,
         clean_before_run: bool = True,
+        headless: bool = False,
+        auth_state_path: str = "",
+        manual_schedule_enabled: bool = False,
+        schedule_start_date: str = "",
+        schedule_morning_time: str = "10:00",
+        schedule_morning_count: int = 1,
+        schedule_afternoon_time: str = "18:00",
+        schedule_afternoon_count: int = 0,
         log: Callable[[str], None] = print,
         stop_requested: Callable[[], bool] | None = None,
+        pause_requested: Callable[[], bool] | None = None,
     ) -> list[ChapterPublishResult]:
         ...
 
@@ -48,6 +57,14 @@ class ChapterSyncer(Protocol):
         failure_screenshots: bool = True,
         git_tracking: bool = True,
         clean_before_run: bool = True,
+        headless: bool = False,
+        auth_state_path: str = "",
+        manual_schedule_enabled: bool = False,
+        schedule_start_date: str = "",
+        schedule_morning_time: str = "10:00",
+        schedule_morning_count: int = 1,
+        schedule_afternoon_time: str = "18:00",
+        schedule_afternoon_count: int = 0,
         stop_requested: Callable[[], bool] | None = None,
     ) -> ChapterSyncResult:
         ...
@@ -67,7 +84,16 @@ class ChapterSyncer(Protocol):
         failure_screenshots: bool = True,
         git_tracking: bool = True,
         clean_before_run: bool = True,
+        headless: bool = False,
+        auth_state_path: str = "",
+        manual_schedule_enabled: bool = False,
+        schedule_start_date: str = "",
+        schedule_morning_time: str = "10:00",
+        schedule_morning_count: int = 1,
+        schedule_afternoon_time: str = "18:00",
+        schedule_afternoon_count: int = 0,
         stop_requested: Callable[[], bool] | None = None,
+        pause_requested: Callable[[], bool] | None = None,
     ) -> list[ChapterSyncResult]:
         ...
 

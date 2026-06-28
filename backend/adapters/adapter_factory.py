@@ -24,8 +24,17 @@ class _PublisherImpl:
         failure_screenshots: bool = True,
         git_tracking: bool = True,
         clean_before_run: bool = True,
+        headless: bool = False,
+        auth_state_path: str = "",
+        manual_schedule_enabled: bool = False,
+        schedule_start_date: str = "",
+        schedule_morning_time: str = "10:00",
+        schedule_morning_count: int = 1,
+        schedule_afternoon_time: str = "18:00",
+        schedule_afternoon_count: int = 0,
         log: Callable[[str], None] = print,
         stop_requested: Callable[[], bool] | None = None,
+        pause_requested: Callable[[], bool] | None = None,
     ) -> list[ChapterPublishResult]:
         from backend.adapters.fanqie_publisher.fanqie_publish_service import run_multi_chapter_publish
 
@@ -39,8 +48,17 @@ class _PublisherImpl:
             failure_screenshots=failure_screenshots,
             git_tracking=git_tracking,
             clean_before_run=clean_before_run,
+            headless=headless,
+            auth_state_path=auth_state_path,
+            manual_schedule_enabled=manual_schedule_enabled,
+            schedule_start_date=schedule_start_date,
+            schedule_morning_time=schedule_morning_time,
+            schedule_morning_count=schedule_morning_count,
+            schedule_afternoon_time=schedule_afternoon_time,
+            schedule_afternoon_count=schedule_afternoon_count,
             log=log,
             stop_requested=stop_requested,
+            pause_requested=pause_requested,
         )
 
 
@@ -61,6 +79,14 @@ class _SyncerImpl:
         failure_screenshots: bool = True,
         git_tracking: bool = True,
         clean_before_run: bool = True,
+        headless: bool = False,
+        auth_state_path: str = "",
+        manual_schedule_enabled: bool = False,
+        schedule_start_date: str = "",
+        schedule_morning_time: str = "10:00",
+        schedule_morning_count: int = 1,
+        schedule_afternoon_time: str = "18:00",
+        schedule_afternoon_count: int = 0,
         stop_requested: Callable[[], bool] | None = None,
     ) -> ChapterSyncResult:
         from backend.adapters.fanqie_syncer.fanqie_sync_service import run_chapter_sync
@@ -78,6 +104,14 @@ class _SyncerImpl:
             failure_screenshots=failure_screenshots,
             git_tracking=git_tracking,
             clean_before_run=clean_before_run,
+            headless=headless,
+            auth_state_path=auth_state_path,
+            manual_schedule_enabled=manual_schedule_enabled,
+            schedule_start_date=schedule_start_date,
+            schedule_morning_time=schedule_morning_time,
+            schedule_morning_count=schedule_morning_count,
+            schedule_afternoon_time=schedule_afternoon_time,
+            schedule_afternoon_count=schedule_afternoon_count,
             stop_requested=stop_requested,
         )
 
@@ -96,7 +130,16 @@ class _SyncerImpl:
         failure_screenshots: bool = True,
         git_tracking: bool = True,
         clean_before_run: bool = True,
+        headless: bool = False,
+        auth_state_path: str = "",
+        manual_schedule_enabled: bool = False,
+        schedule_start_date: str = "",
+        schedule_morning_time: str = "10:00",
+        schedule_morning_count: int = 1,
+        schedule_afternoon_time: str = "18:00",
+        schedule_afternoon_count: int = 0,
         stop_requested: Callable[[], bool] | None = None,
+        pause_requested: Callable[[], bool] | None = None,
     ) -> list[ChapterSyncResult]:
         from backend.adapters.fanqie_syncer.fanqie_sync_service import run_multi_chapter_sync
 
@@ -113,7 +156,16 @@ class _SyncerImpl:
             failure_screenshots=failure_screenshots,
             git_tracking=git_tracking,
             clean_before_run=clean_before_run,
+            headless=headless,
+            auth_state_path=auth_state_path,
+            manual_schedule_enabled=manual_schedule_enabled,
+            schedule_start_date=schedule_start_date,
+            schedule_morning_time=schedule_morning_time,
+            schedule_morning_count=schedule_morning_count,
+            schedule_afternoon_time=schedule_afternoon_time,
+            schedule_afternoon_count=schedule_afternoon_count,
             stop_requested=stop_requested,
+            pause_requested=pause_requested,
         )
 
     def collect_remote_chapter_numbers(

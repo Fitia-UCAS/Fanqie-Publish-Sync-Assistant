@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+
+from backend.adapters.fanqie_web.models import ScheduledPublishSlot
 
 
 @dataclass(slots=True)
@@ -28,6 +30,9 @@ class ChapterSyncOptions:
     failure_screenshots: bool = True
     git_tracking: bool = True
     clean_before_run: bool = True
+    headless: bool = False
+    auth_state_path: str = ""
+    schedule_slots: dict[int, ScheduledPublishSlot] = field(default_factory=dict)
 
     @property
     def is_publish_to_remote(self) -> bool:
@@ -36,3 +41,6 @@ class ChapterSyncOptions:
     @property
     def should_final_list_verify(self) -> bool:
         return bool(self.verify_after_publish) and self.is_publish_to_remote
+
+    def schedule_for(self, chapter_no: int) -> ScheduledPublishSlot | None:
+        return self.schedule_slots.get(chapter_no)

@@ -299,3 +299,105 @@
     }
   };
 })();
+
+(function () {
+  window.NovelFanqieAccountMethods = {
+    renderFanqieLoginStateRow(prefix, cfg = {}) {
+      return `<div class="field fanqie-login-state-row">
+        <label>登录状态</label>
+        ${this.filePicker(`${prefix}AuthStatePath`, cfg.authStatePath || '', `${prefix}ChooseAuthState`, '默认 state.json')}
+      </div>`;
+    },
+    bindFanqieLoginStateControls(prefix, configPath) {
+      document.getElementById(`${prefix}ChooseAuthState`)?.addEventListener('click', async () => {
+        const path = this.api.choose_login_state
+          ? await this.api.choose_login_state(configPath)
+          : await this.api.choose_file(configPath, false, 'state.json');
+        if (!path) return;
+        this.setConfigValue(configPath, path);
+        this.updateFilePicker(`${prefix}AuthStatePath`, path, '默认 state.json');
+        await this.persistPageConfig(this.currentPage);
+      });
+    },
+  };
+})();
+(function () {
+  window.NovelFanqieTaskMethods = {
+    bindAutoPublishPage() {
+      this.bindChooseSource('apChooseNovel', 'auto_publish.novelFile', 'apNovelFile', '选择小说来源');
+      document.querySelectorAll('[data-auto-op]').forEach((button) => button.addEventListener('click', () => this.runAutoPublish(button.dataset.autoOp)));
+      document.getElementById('apStop')?.addEventListener('click', () => this.stopTask('auto_publish_stop', 'auto_publish'));
+      document.getElementById('apPause')?.addEventListener('click', () => this.stopTask('auto_publish_pause', 'auto_publish'));
+      document.getElementById('apResume')?.addEventListener('click', () => this.stopTask('auto_publish_resume', 'auto_publish'));
+      this.bindFanqieLoginStateControls('ap', 'auto_publish.authStatePath');
+      this.bindManualScheduleToggle('ap');
+    },
+    async runAutoPublish(operation) {
+      const payload = this.collectPublishPayload('ap', operation);
+      this.state.config.auto_publish = payload;
+      await this.saveConfig();
+      this.beginTaskUi('auto_publish', '准备启动番茄发布...');
+      const ok = await this.api.auto_publish_run(payload);
+      if (!ok) this.toast('任务没有启动，请查看日志。', 'warning', 'auto_publish');
+    },
+
+    bindChapterSyncPage() {
+      this.bindChooseSource('syChooseNovel', 'chapter_sync.novelFile', 'syNovelFile', '选择小说来源');
+      document.querySelectorAll('[data-sync-op]').forEach((button) => button.addEventListener('click', () => this.runChapterSync(button.dataset.syncOp)));
+      document.getElementById('syStop')?.addEventListener('click', () => this.stopTask('chapter_sync_stop', 'chapter_sync'));
+      document.getElementById('syPause')?.addEventListener('click', () => this.stopTask('chapter_sync_pause', 'chapter_sync'));
+      document.getElementById('syResume')?.addEventListener('click', () => this.stopTask('chapter_sync_resume', 'chapter_sync'));
+      this.bindFanqieLoginStateControls('sy', 'chapter_sync.authStatePath');
+    },
+    async runChapterSync(operation) {
+      const payload = this.collectPublishPayload('sy', operation);
+      this.state.config.chapter_sync = payload;
+      await this.saveConfig();
+      this.beginTaskUi('chapter_sync', '准备启动番茄同步...');
+      const ok = await this.api.chapter_sync_run(payload);
+      if (!ok) this.toast('任务没有启动，请查看日志。', 'warning', 'chapter_sync');
+    },
+    bindManualScheduleToggle(prefix) {
+      const checkbox = document.getElementById(`${prefix}ManualSchedule`);
+      const fields = document.getElementById(`${prefix}ManualScheduleFields`);
+      const sync = () => fields?.classList.toggle('hidden', !checkbox?.checked);
+      checkbox?.addEventListener('change', sync);
+      sync();
+    },
+    bindChooseSource(buttonId, configPath, inputId, emptyText, afterChoose) {
+      document.getElementById(buttonId)?.addEventListener('click', async () => {
+        const path = this.api.choose_source
+          ? await this.api.choose_source(configPath)
+          : await this.api.choose_file(configPath, false, 'novel.txt');
+        if (!path) return;
+        this.setConfigValue(configPath, path);
+        this.updateFilePicker(inputId, path, emptyText);
+        if (afterChoose) await afterChoose(path);
+        await this.persistPageConfig(this.currentPage);
+      });
+    },
+    collectPublishPayload(prefix, operation) {
+      return {
+        novelFile: document.getElementById(`${prefix}NovelFile`)?.value || '',
+        chapterManageUrl: document.getElementById(`${prefix}Url`)?.value || '',
+        authStatePath: document.getElementById(`${prefix}AuthStatePath`)?.value || '',
+        start: Number(document.getElementById(`${prefix}Start`)?.value || 1),
+        end: Number(document.getElementById(`${prefix}End`)?.value || 1),
+        useAi: !!document.getElementById(`${prefix}UseAi`)?.checked,
+        verifyAfterPublish: !!document.getElementById(`${prefix}VerifyAfterPublish`)?.checked,
+        debugScreenshots: !!document.getElementById(`${prefix}DebugScreenshots`)?.checked,
+        failureScreenshots: !!document.getElementById(`${prefix}FailureScreenshots`)?.checked,
+        gitTracking: !!document.getElementById(`${prefix}GitTracking`)?.checked,
+        cleanBeforeRun: !!document.getElementById(`${prefix}CleanBeforeRun`)?.checked,
+        headless: !!document.getElementById(`${prefix}Headless`)?.checked,
+        manualSchedule: !!document.getElementById(`${prefix}ManualSchedule`)?.checked,
+        scheduleStartDate: document.getElementById(`${prefix}ScheduleStartDate`)?.value || '',
+        scheduleMorningTime: document.getElementById(`${prefix}ScheduleMorningTime`)?.value || '10:00',
+        scheduleMorningCount: Number(document.getElementById(`${prefix}ScheduleMorningCount`)?.value || 1),
+        scheduleAfternoonTime: document.getElementById(`${prefix}ScheduleAfternoonTime`)?.value || '18:00',
+        scheduleAfternoonCount: Number(document.getElementById(`${prefix}ScheduleAfternoonCount`)?.value || 0),
+        operation,
+      };
+    },
+  };
+})();
