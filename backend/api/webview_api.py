@@ -289,6 +289,24 @@ class WebviewApi:
 
         return self._start_task("webnovel_writer", "webnovel_writer", worker)
 
+    def webnovel_writer_context_run(self, payload: dict[str, Any]) -> bool:
+        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
+            return self._webnovel_writer.prepare_context_pack(payload or {}, callbacks)
+
+        return self._start_task("webnovel_writer", "webnovel_writer", worker)
+
+    def webnovel_writer_sync_control_run(self, payload: dict[str, Any]) -> bool:
+        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
+            return self._webnovel_writer.sync_control(payload or {}, callbacks)
+
+        return self._start_task("webnovel_writer", "webnovel_writer", worker)
+
+    def webnovel_writer_templates_run(self, payload: dict[str, Any]) -> bool:
+        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
+            return self._webnovel_writer.refresh_templates(payload or {}, callbacks)
+
+        return self._start_task("webnovel_writer", "webnovel_writer", worker)
+
     def webnovel_writer_stop(self) -> bool:
         return self._stop_task("webnovel_writer", "webnovel_writer", "已请求停止 webnovel-writer 任务，当前步骤结束后会停下。")
 

@@ -419,7 +419,9 @@ button:disabled { opacity: .52; cursor: not-allowed; transform: none !important;
 .big-action.primary-action span { background: #f1f5f9; color: #334155; }
 .inline-control-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
 .account-control-row .mini-btn { min-width: 70px; height: var(--control-height); min-height: var(--control-height); border-radius: 13px; }
-.manual-schedule-fields { display: grid; gap: 10px; }
+.manual-schedule-fields { display: grid; gap: 11px; }
+.schedule-time-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.schedule-date-field .input { max-width: 100%; }
 .manual-schedule-fields.hidden { display: none; }
 .fanqie-actions .wide-action { width: 100%; }
 .fanqie-actions .big-action,

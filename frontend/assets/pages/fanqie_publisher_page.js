@@ -31,13 +31,11 @@ window.renderFanqiePublisherPage = function renderFanqiePublisherPage(app) {
                 <label><input type="checkbox" id="apManualSchedule" ${cfg.manualSchedule ? 'checked' : ''}/> 手动定时</label>
               </div>
               <div class="manual-schedule-fields ${cfg.manualSchedule ? '' : 'hidden'}" id="apManualScheduleFields">
-                <div class="field-triple">
-                  <div class="field"><label>起始日期</label><input class="input" id="apScheduleStartDate" type="date" value="${app.attr(cfg.scheduleStartDate || '')}" /></div>
-                  <div class="field"><label>上午</label><input class="input" id="apScheduleMorningTime" type="time" value="${app.attr(cfg.scheduleMorningTime || '10:00')}" /></div>
+                <div class="field schedule-date-field"><label>起始日期</label><input class="input" id="apScheduleStartDate" type="date" value="${app.attr(cfg.scheduleStartDate || '')}" /></div>
+                <div class="schedule-time-grid">
+                  <div class="field"><label>上午时间</label><input class="input" id="apScheduleMorningTime" type="time" value="${app.attr(cfg.scheduleMorningTime || '10:00')}" /></div>
                   <div class="field"><label>上午章数</label><input class="input" id="apScheduleMorningCount" type="number" min="0" value="${app.attr(cfg.scheduleMorningCount || 1)}" /></div>
-                </div>
-                <div class="field-pair">
-                  <div class="field"><label>下午</label><input class="input" id="apScheduleAfternoonTime" type="time" value="${app.attr(cfg.scheduleAfternoonTime || '18:00')}" /></div>
+                  <div class="field"><label>下午时间</label><input class="input" id="apScheduleAfternoonTime" type="time" value="${app.attr(cfg.scheduleAfternoonTime || '18:00')}" /></div>
                   <div class="field"><label>下午章数</label><input class="input" id="apScheduleAfternoonCount" type="number" min="0" value="${app.attr(cfg.scheduleAfternoonCount || 0)}" /></div>
                 </div>
               </div>
