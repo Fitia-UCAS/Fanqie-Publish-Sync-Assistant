@@ -55,11 +55,6 @@ CURRENT_PLOT_HISTORY_DIR = CURRENT_PLOT_DIR / "current_plot_history"
 CURRENT_PLOT_LOG_DIR = CURRENT_PLOT_DIR / "current_plot_tasklogs"
 CURRENT_PLOT_OUTPUT_DIR = CURRENT_PLOT_DIR / "current_plot_outputs"
 
-WEBNOVEL_WRITER_DIR = DATA_DIR / "webnovel_writer"
-WEBNOVEL_WRITER_PROJECT_DIR = WEBNOVEL_WRITER_DIR / "projects"
-WEBNOVEL_WRITER_OUTPUT_DIR = WEBNOVEL_WRITER_DIR / "outputs"
-WEBNOVEL_WRITER_BACKUP_DIR = WEBNOVEL_WRITER_DIR / "backups"
-WEBNOVEL_WRITER_LOG_DIR = WEBNOVEL_WRITER_DIR / "webnovel_writer_tasklogs"
 
 
 PUBLISH_DIR = DATA_DIR / "fanqie_publisher"
@@ -142,11 +137,6 @@ PROJECT_DIRECTORIES: tuple[Path, ...] = (
     CURRENT_PLOT_HISTORY_DIR,
     CURRENT_PLOT_LOG_DIR,
     CURRENT_PLOT_OUTPUT_DIR,
-    WEBNOVEL_WRITER_DIR,
-    WEBNOVEL_WRITER_PROJECT_DIR,
-    WEBNOVEL_WRITER_OUTPUT_DIR,
-    WEBNOVEL_WRITER_BACKUP_DIR,
-    WEBNOVEL_WRITER_LOG_DIR,
     PUBLISH_DIR,
     CHAPTER_SYNC_DIR,
     BROWSER_DATA_DIR,
@@ -161,7 +151,6 @@ LOG_CATEGORIES: dict[str, Path] = {
     "web_crawler": WEB_CRAWLER_LOG_DIR,
     "character_material": CHARACTER_MATERIAL_LOG_DIR,
     "current_plot": CURRENT_PLOT_LOG_DIR,
-    "webnovel_writer": WEBNOVEL_WRITER_LOG_DIR,
     "fanqie_web": FANQIE_WEB_LOG_DIR,
 }
 
@@ -196,9 +185,6 @@ def get_state_paths() -> dict[str, str]:
         "novel_crawler": str(WEB_CRAWLER_DIR),
         "character_material": str(CHARACTER_MATERIAL_DIR),
         "current_plot": str(CURRENT_PLOT_DIR),
-        "webnovel_writer": str(WEBNOVEL_WRITER_DIR),
-        "webnovel_writer_projects": str(WEBNOVEL_WRITER_PROJECT_DIR),
-        "webnovel_writer_outputs": str(WEBNOVEL_WRITER_OUTPUT_DIR),
         "fanqie_publisher": str(PUBLISH_DIR),
         "fanqie_syncer": str(CHAPTER_SYNC_DIR),
         "system_logs": str(SYSTEM_TASK_LOG_DIR),
@@ -212,7 +198,6 @@ def get_state_paths() -> dict[str, str]:
         "web_crawler_logs": str(WEB_CRAWLER_LOG_DIR),
         "character_material_logs": str(CHARACTER_MATERIAL_LOG_DIR),
         "current_plot_logs": str(CURRENT_PLOT_LOG_DIR),
-        "webnovel_writer_logs": str(WEBNOVEL_WRITER_LOG_DIR),
         "fanqie_web_logs": str(FANQIE_WEB_LOG_DIR),
         "process_novel_outputs": str(PROCESS_OUTPUT_DIR),
         "web_crawler_outputs": str(WEB_CRAWLER_OUTPUT_DIR),

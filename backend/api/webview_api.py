@@ -29,7 +29,6 @@ from backend.api.desktop_api import open_file, open_login_state_dialog, open_nat
 from backend.adapters.novel_crawler.crawler_service import NovelCrawlerService
 from backend.adapters.character_material import CharacterMaterialService
 from backend.adapters.current_plot import CurrentPlotService
-from backend.adapters.webnovel_writer import WebnovelWriterService
 from backend.api.frontend_api import FrontendBridge
 
 
@@ -53,7 +52,6 @@ class WebviewApi:
         self._bridge = FrontendBridge()
         self._character_material = CharacterMaterialService()
         self._current_plot = CurrentPlotService()
-        self._webnovel_writer = WebnovelWriterService()
         self._latest_task_logs: dict[str, str] = {}
 
     def bind_window(self, window: Any) -> None:
@@ -71,9 +69,6 @@ class WebviewApi:
             "characterMaterialDefaults": {key: self._character_material.default_platform_values(key) for key in self._character_material.platforms()},
             "currentPlotPlatforms": self._current_plot.platforms(),
             "currentPlotDefaults": {key: self._current_plot.default_platform_values(key) for key in self._current_plot.platforms()},
-            "webnovelWriterPlatforms": self._webnovel_writer.platforms(),
-            "webnovelWriterDefaults": {key: self._webnovel_writer.default_platform_values(key) for key in self._webnovel_writer.platforms()},
-            "webnovelWriterProjects": self._webnovel_writer.list_projects().get("projects", []),
             "adProfiles": ad_profiles(),
             "logTail": self._read_log_tail(),
         }
@@ -213,102 +208,6 @@ class WebviewApi:
         return self._start_task("web_crawler", "web_crawler", worker)
 
 
-
-    def webnovel_writer_platform_defaults(self, platform: str = "deepseek") -> dict[str, Any]:
-        try:
-            values = self._webnovel_writer.default_platform_values(platform)
-            return {"ok": True, **values}
-        except Exception as exc:
-            return {"ok": False, "message": str(exc)}
-
-    def webnovel_writer_list_projects(self) -> dict[str, Any]:
-        try:
-            return self._webnovel_writer.list_projects()
-        except Exception as exc:
-            return {"ok": False, "message": str(exc), "projects": []}
-
-    def webnovel_writer_save_project(self, payload: dict[str, Any]) -> dict[str, Any]:
-        try:
-            result = self._webnovel_writer.save_project(payload or {})
-            meta = result.get("meta", {})
-            paths = result.get("paths", {})
-            cfg = self._config.setdefault("webnovel_writer", {})
-            cfg["projectId"] = meta.get("project_id", "")
-            if paths.get("root"):
-                cfg["projectPath"] = paths.get("root", "")
-            if meta.get("novel_file"):
-                cfg["novelFilePath"] = meta.get("novel_file", "")
-            if meta.get("story_config_source"):
-                cfg["storyConfigPath"] = meta.get("story_config_source", "")
-            save_config(self._config)
-            return result
-        except Exception as exc:
-            return {"ok": False, "message": str(exc)}
-
-    def webnovel_writer_load_project(self, project_id: str = "") -> dict[str, Any]:
-        try:
-            return self._webnovel_writer.load_project(project_id)
-        except Exception as exc:
-            return {"ok": False, "message": str(exc)}
-
-    def webnovel_writer_dashboard(self, project_id: str = "") -> dict[str, Any]:
-        try:
-            return self._webnovel_writer.dashboard(project_id)
-        except Exception as exc:
-            return {"ok": False, "message": str(exc)}
-
-    def webnovel_writer_plan_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            return self._webnovel_writer.plan(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_write_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            if (payload or {}).get("batch"):
-                return self._webnovel_writer.batch_write(payload or {}, callbacks)
-            return self._webnovel_writer.write_chapter(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_review_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            return self._webnovel_writer.review_chapter(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_export_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            return self._webnovel_writer.export(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_validate_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            return self._webnovel_writer.validate_project(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_context_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            return self._webnovel_writer.prepare_context_pack(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_sync_control_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            return self._webnovel_writer.sync_control(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_templates_run(self, payload: dict[str, Any]) -> bool:
-        def worker(callbacks: TaskCallbacks) -> TaskResult | dict[str, Any]:
-            return self._webnovel_writer.refresh_templates(payload or {}, callbacks)
-
-        return self._start_task("webnovel_writer", "webnovel_writer", worker)
-
-    def webnovel_writer_stop(self) -> bool:
-        return self._stop_task("webnovel_writer", "webnovel_writer", "已请求停止 webnovel-writer 任务，当前步骤结束后会停下。")
 
     def character_material_platform_defaults(self, platform: str = "deepseek") -> dict[str, Any]:
         try:
@@ -511,7 +410,6 @@ def _log_category_for_page(page: str) -> str:
         "web_crawler": "web_crawler",
         "character_material": "character_material",
         "current_plot": "current_plot",
-        "webnovel_writer": "webnovel_writer",
         "process_novel": "process_novel",
         "process_novel_batch": "process_novel",
         "clean_text_ads": "process_novel",

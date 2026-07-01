@@ -40,7 +40,7 @@ class NamingRulesTest(unittest.TestCase):
 
     def test_adapter_directory_names_use_business_capability_nouns(self) -> None:
         adapters_dir = ROOT_DIR / "backend" / "adapters"
-        self.assertEqual(_dir_names(adapters_dir), {"character_material", "current_plot", "fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler", "webnovel_writer"})
+        self.assertEqual(_dir_names(adapters_dir), {"character_material", "current_plot", "fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler"})
 
     def test_fanqie_publisher_files_share_fanqie_publish_prefix(self) -> None:
         publisher_dir = ROOT_DIR / "backend" / "adapters" / "fanqie_publisher"
@@ -204,19 +204,16 @@ class NamingRulesTest(unittest.TestCase):
             verb = path.stem.split("_", 1)[0]
             self.assertIn(verb, allowed_verbs, str(path))
 
-    def test_frontend_assets_use_folder_local_styles(self) -> None:
-        assets_dir = ROOT_DIR / "frontend" / "assets"
+    def test_frontend_assets_use_product_entry_names(self) -> None:
+        frontend_dir = ROOT_DIR / "frontend"
+        assets_dir = frontend_dir / "assets"
+        self.assertTrue((frontend_dir / "README.md").exists())
+        self.assertTrue((frontend_dir / "index.html").exists())
+        self.assertEqual(_dir_names(frontend_dir), {"assets"})
         self.assertEqual(_file_names(assets_dir, ".js"), {"app.js"})
-        self.assertEqual({path.name for path in assets_dir.glob("*.css")}, {"styles.css"})
-        core_dir = assets_dir / "core"
-        self.assertEqual(_file_names(core_dir, ".js"), {"ui_character_material.js", "ui_current_plot.js", "ui_form_controls.js", "ui_novel_splitter.js", "ui_page_registry.js", "ui_state_store.js", "ui_task_panel.js", "ui_webnovel_writer.js"})
-        for path in core_dir.glob("*.js"):
-            self.assertTrue(path.name.startswith("ui_"), str(path))
-        page_dir = assets_dir / "pages"
-        expected_pages = {"character_material_page.js", "current_plot_page.js", "novel_processor_page.js", "fanqie_publisher_page.js", "fanqie_syncer_page.js", "novel_crawler_page.js", "webnovel_writer_page.js"}
-        self.assertEqual(_file_names(page_dir, ".js"), expected_pages)
-        for path in page_dir.glob("*.js"):
-            self.assertTrue(path.name.endswith("_page.js"), str(path))
+        self.assertEqual({path.name for path in assets_dir.glob("*.css")}, {"app.css"})
+        self.assertFalse((ROOT_DIR / ("frontend" + "_" + "dash" + "board")).exists())
+        self.assertFalse((ROOT_DIR / ("main" + "_" + "dash" + "board.py")).exists())
 
     def test_tests_use_area_subject_names_after_prefix(self) -> None:
         expected = {
@@ -244,7 +241,7 @@ class NamingRulesTest(unittest.TestCase):
 
     def test_data_directories_use_feature_prefixed_standard_names(self) -> None:
         data_dir = ROOT_DIR / "data"
-        self.assertEqual(_dir_names(data_dir), {"app_system", "character_material", "current_plot", "fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler", "novel_processor", "webnovel_writer"})
+        self.assertEqual(_dir_names(data_dir), {"app_system", "character_material", "current_plot", "fanqie_publisher", "fanqie_syncer", "fanqie_web", "novel_crawler", "novel_processor"})
         self.assertEqual(
             _dir_names(data_dir / "app_system"),
             {"app_system_backups", "app_system_compare_reports", "app_system_debug", "app_system_history", "app_system_tasklogs"},

@@ -3,79 +3,328 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>番茄小说发布同步助手</title>
-    <link rel="icon" type="image/x-icon" href="../logo.ico" />
-    <link rel="stylesheet" href="assets/styles.css" />
+    <title>番茄发布与同步助手</title>
+    <link rel="stylesheet" href="assets/app.css" />
   </head>
-  <body>
-    <div class="app-shell">
-      <div class="system-titlebar">
-        <div class="system-title"><span class="system-dot"></span> FANQIE NOVEL PUBLISH SYNC ASSISTANT | LOCAL TOOL</div>
-      </div>
-
-      <header class="top-header">
-        <div class="brand-menu-wrap no-drag">
-          <button class="brand-button" id="brandButton" type="button" aria-haspopup="true" aria-expanded="false">
-            <span class="brand-mark"></span>
-            <span class="brand-text">FANQIE NOVEL PUBLISH SYNC ASSISTANT</span>
-            <span class="brand-separator" aria-hidden="true">|</span>
-            <span class="brand-mode" id="brandModeText">LOCAL TOOL</span>
-          </button>
-          <div class="page-menu" id="pageMenu" aria-label="页面选择">
-            <button data-page="auto_publish">番茄发布</button>
-            <button data-page="chapter_sync">番茄同步</button>
-            <button data-page="process_novel">小说处理</button>
-            <button data-page="web_crawler">网页抓取</button>
-            <button data-page="character_material">角色素材</button>
-            <button data-page="current_plot">当前剧情</button>
-            <button data-page="webnovel_writer">网文写作</button>
+  <body data-style="pixel" data-current-view="publish">
+    <div class="pixel-shell">
+      <aside class="pixel-sidebar">
+        <div class="brand-panel">
+          <img class="brand-logo" src="../logo.png" alt="" onerror="this.classList.add('hidden-logo')" />
+          <div>
+            <strong>番茄发布与同步助手</strong>
           </div>
         </div>
 
+        <nav class="pixel-nav" aria-label="功能导航">
+          <button class="active" data-view="publish"><span class="nav-icon">↑</span>番茄发布</button>
+          <button data-view="sync"><span class="nav-icon">↓</span>番茄同步</button>
+          <button data-view="process"><span class="nav-icon">▤</span>小说处理</button>
+          <button data-view="crawler"><span class="nav-icon">⌁</span>网页抓取</button>
+          <button data-view="character_material"><span class="nav-icon">◆</span>角色素材</button>
+          <button data-view="current_plot"><span class="nav-icon">◇</span>当前剧情</button>
+        </nav>
 
-        <div class="header-actions no-drag">
-          <button class="header-btn" id="themeButton" type="button">外观偏好</button>
-          <button class="header-btn" id="resetDataButton" type="button">重置数据</button>
-          <button class="header-btn" id="loginButton" type="button">重置授权</button>
-          <div class="status-badge" id="statusBadge"><i></i> 就绪</div>
-        </div>
-      </header>
+        <section class="sidebar-card theme-card" aria-label="主题切换">
+          <div class="theme-switch">
+            <button class="active" data-theme-style="pixel">像素原版</button>
+            <button data-theme-style="night">夜间像素</button>
+          </div>
+        </section>
+      </aside>
 
-      <main class="page-host" id="pageHost"></main>
+      <main class="pixel-main">
+        <section class="view-panel" data-panel="publish">
+          <article class="pixel-card form-card">
+            <div class="form-grid">
+              <label class="field full">小说来源
+                <div class="file-row"><input id="apNovelFile" placeholder="选择或粘贴本地 TXT 路径" /><button class="pixel-btn" data-choose="source" data-target="apNovelFile" data-config="auto_publish.novelFile">选择</button></div>
+              </label>
+              <label class="field full">章节管理 URL <input id="apUrl" type="password" autocomplete="off" placeholder="https://fanqienovel.com/ 或章节管理页面 URL" /></label>
+              <label class="field full">登录状态
+                <div class="file-row"><input id="apAuthStatePath" placeholder="默认 state.json" /><button class="pixel-btn" data-choose="auth" data-target="apAuthStatePath" data-config="auto_publish.authStatePath">选择</button></div>
+              </label>
+              <label class="field">起始章节 <input id="apStart" type="number" min="1" value="1" /></label>
+              <label class="field">结束章节 <input id="apEnd" type="number" min="1" value="1" /></label>
+            </div>
+            <div class="option-grid">
+              <label><input type="checkbox" id="apUseAi" /> 使用 AI</label>
+              <label><input type="checkbox" id="apVerifyAfterPublish" checked /> 列表校验</label>
+              <label><input type="checkbox" id="apHeadless" /> 后台无头</label>
+              <label><input type="checkbox" id="apDebugScreenshots" checked /> 步骤截图</label>
+              <label><input type="checkbox" id="apFailureScreenshots" checked /> 失败截图</label>
+              <label><input type="checkbox" id="apGitTracking" checked /> Git 追踪</label>
+              <label><input type="checkbox" id="apCleanBeforeRun" checked /> 启动清理</label>
+              <label><input type="checkbox" id="apManualSchedule" /> 手动定时</label>
+            </div>
+            <div class="schedule-box hidden" id="apManualScheduleFields">
+              <label>起始日期 <input id="apScheduleStartDate" type="date" /></label>
+              <label>上午时间 <input id="apScheduleMorningTime" type="time" value="10:00" /></label>
+              <label>上午章数 <input id="apScheduleMorningCount" type="number" min="0" value="1" /></label>
+              <label>下午时间 <input id="apScheduleAfternoonTime" type="time" value="18:00" /></label>
+              <label>下午章数 <input id="apScheduleAfternoonCount" type="number" min="0" value="0" /></label>
+            </div>
+            <div class="action-grid">
+              <button class="pixel-btn primary" data-run="auto_publish" data-operation="publish">启动发布</button>
+              <button class="pixel-btn" data-run="auto_publish_stop">停止发布</button>
+              <button class="pixel-btn" data-run="auto_publish_pause">暂停</button>
+              <button class="pixel-btn" data-run="auto_publish_resume">继续</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-panel="sync">
+          <article class="pixel-card form-card">
+            <div class="form-grid">
+              <label class="field full">小说来源
+                <div class="file-row"><input id="syNovelFile" placeholder="选择或粘贴本地 TXT 路径" /><button class="pixel-btn" data-choose="source" data-target="syNovelFile" data-config="chapter_sync.novelFile">选择</button></div>
+              </label>
+              <label class="field full">章节管理 URL <input id="syUrl" type="password" autocomplete="off" placeholder="https://fanqienovel.com/ 或章节管理页面 URL" /></label>
+              <label class="field full">登录状态
+                <div class="file-row"><input id="syAuthStatePath" placeholder="默认 state.json" /><button class="pixel-btn" data-choose="auth" data-target="syAuthStatePath" data-config="chapter_sync.authStatePath">选择</button></div>
+              </label>
+              <label class="field">起始章节 <input id="syStart" type="number" min="1" value="1" /></label>
+              <label class="field">结束章节 <input id="syEnd" type="number" min="1" value="1" /></label>
+            </div>
+            <div class="option-grid">
+              <label><input type="checkbox" id="syUseAi" /> 使用 AI</label>
+              <label><input type="checkbox" id="syVerifyAfterPublish" checked /> 列表校验</label>
+              <label><input type="checkbox" id="syHeadless" /> 后台无头</label>
+              <label><input type="checkbox" id="syDebugScreenshots" checked /> 步骤截图</label>
+              <label><input type="checkbox" id="syFailureScreenshots" checked /> 失败截图</label>
+              <label><input type="checkbox" id="syGitTracking" checked /> Git 追踪</label>
+              <label><input type="checkbox" id="syCleanBeforeRun" checked /> 启动清理</label>
+              <label><input type="checkbox" id="syManualSchedule" /> 手动定时</label>
+            </div>
+            <div class="schedule-box hidden" id="syManualScheduleFields">
+              <label>起始日期 <input id="syScheduleStartDate" type="date" /></label>
+              <label>上午时间 <input id="syScheduleMorningTime" type="time" value="10:00" /></label>
+              <label>上午章数 <input id="syScheduleMorningCount" type="number" min="0" value="1" /></label>
+              <label>下午时间 <input id="syScheduleAfternoonTime" type="time" value="18:00" /></label>
+              <label>下午章数 <input id="syScheduleAfternoonCount" type="number" min="0" value="0" /></label>
+            </div>
+            <div class="action-grid">
+              <button class="pixel-btn primary" data-run="chapter_sync" data-operation="publish">开始同步</button>
+              <button class="pixel-btn" data-run="chapter_sync" data-operation="pull">拉取远端</button>
+              <button class="pixel-btn" data-run="chapter_sync" data-operation="compare">打开对比</button>
+              <button class="pixel-btn" data-run="chapter_sync_stop">停止同步</button>
+              <button class="pixel-btn" data-run="chapter_sync_pause">暂停</button>
+              <button class="pixel-btn" data-run="chapter_sync_resume">继续</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-panel="process">
+          <article class="pixel-card form-card process-stack">
+            <section class="tool-block">
+              <div class="form-grid">
+                <label class="field full">完整小说 TXT
+                  <div class="file-row"><input id="exNovelFile" placeholder="选择完整小说 TXT" /><button class="pixel-btn" data-choose="file" data-target="exNovelFile" data-config="process_novel.novelFile">选择</button></div>
+                </label>
+                <label class="field full">章节输出 TXT
+                  <div class="file-row"><input id="exOutputFile" placeholder="自动命名 / 选择输出 TXT" /><button class="pixel-btn" data-choose="save" data-target="exOutputFile" data-config="process_novel.outputFile">选择</button></div>
+                </label>
+                <label>单章 <input id="exChapter" type="number" min="1" placeholder="章节号" /></label>
+                <label>前后章 <input id="exAroundChapter" type="number" min="1" placeholder="当前章" /></label>
+                <label>范围开始 <input id="exStart" type="number" min="1" placeholder="起始章" /></label>
+                <label>范围结束 <input id="exEnd" type="number" min="1" placeholder="结束章" /></label>
+              </div>
+              <div class="action-grid three">
+                <button class="pixel-btn" data-process="single">提取单章</button>
+                <button class="pixel-btn" data-process="around">提取前后</button>
+                <button class="pixel-btn" data-process="range">提取范围</button>
+                <button class="pixel-btn" data-process="organizeSingle">整理单章</button>
+                <button class="pixel-btn" data-process="organizeAround">整理前后</button>
+                <button class="pixel-btn" data-process="organizeRange">整理范围</button>
+                <button class="pixel-btn primary span-all" data-process="formatNovel">格式化整本</button>
+              </div>
+            </section>
+
+            <section class="tool-block">
+              <div class="form-grid">
+                <label class="field full">待分割小说 TXT
+                  <div class="file-row"><input id="spInputFile" placeholder="选择完整小说 TXT" /><button class="pixel-btn" data-choose="file" data-target="spInputFile" data-config="novel_splitter.inputFile">选择</button></div>
+                </label>
+                <label class="field full">分割输出目录
+                  <div class="file-row"><input id="spOutputDir" placeholder="自动生成 / 选择目录" /><button class="pixel-btn" data-choose="folder" data-target="spOutputDir" data-config="novel_splitter.outputDir">选择</button></div>
+                </label>
+                <label>分割方式 <select id="spMode"><option value="chapter_count">按章节数分割</option><option value="size">按大小分割</option></select></label>
+                <label>每份章节数 <input id="spChaptersPerFile" type="number" min="1" value="10" /></label>
+                <label>每份大小 MB <input id="spMaxSizeMb" type="number" min="0.1" step="0.1" value="5" /></label>
+              </div>
+              <div class="option-grid two">
+                <label><input type="checkbox" id="spIncludePrelude" checked /> 保留正文前内容</label>
+                <label><input type="checkbox" id="spCleanOutput" /> 清空旧 TXT</label>
+              </div>
+              <div class="action-grid single">
+                <button class="pixel-btn primary" data-run="novel_splitter">开始分割</button>
+              </div>
+            </section>
+
+            <section class="tool-block">
+              <div class="form-grid">
+                <label class="field full">批量稿件文件夹
+                  <div class="file-row"><input id="exBatchFolder" placeholder="选择文件夹" /><button class="pixel-btn" data-choose="folder" data-target="exBatchFolder" data-config="process_novel.batchFolder">选择</button></div>
+                </label>
+              </div>
+              <div class="option-grid two">
+                <label><input type="checkbox" checked disabled /> TXT</label>
+                <label><input type="checkbox" id="exBackup" checked /> 备份</label>
+              </div>
+              <div class="action-grid single">
+                <button class="pixel-btn primary" data-process="formatFolder" data-log-target="process_novel_batch">批量格式化</button>
+              </div>
+            </section>
+
+            <section class="tool-block">
+              <div class="form-grid">
+                <label class="field full">待清理 TXT
+                  <div class="file-row"><input id="tcAdInput" placeholder="选择 TXT" /><button class="pixel-btn" data-choose="file" data-target="tcAdInput" data-config="clean_text.adInputFile">选择</button></div>
+                </label>
+                <label class="field full">批量清理文件夹
+                  <div class="file-row"><input id="tcAdFolder" placeholder="选择文件夹" /><button class="pixel-btn" data-choose="folder" data-target="tcAdFolder" data-config="clean_text.adBatchFolder">选择</button></div>
+                </label>
+                <label>广告配置 <select id="tcAdProfile"><option value="mimiread">默认广告规则</option></select></label>
+              </div>
+              <div class="option-grid two">
+                <label><input type="checkbox" id="tcAdOverwrite" checked /> 覆盖</label>
+                <label><input type="checkbox" id="tcAdBackup" checked /> 备份</label>
+              </div>
+              <div class="action-grid single">
+                <button class="pixel-btn primary" data-run="clean_text" data-scope="ad">清理广告</button>
+              </div>
+            </section>
+
+            <section class="tool-block">
+              <div class="form-grid">
+                <label class="field full">待修复 TXT
+                  <div class="file-row"><input id="tcMoveInput" placeholder="选择 TXT" /><button class="pixel-btn" data-choose="file" data-target="tcMoveInput" data-config="clean_text.moveInputFile">选择</button></div>
+                </label>
+                <label class="field full">批量修复文件夹
+                  <div class="file-row"><input id="tcMoveFolder" placeholder="选择文件夹" /><button class="pixel-btn" data-choose="folder" data-target="tcMoveFolder" data-config="clean_text.moveBatchFolder">选择</button></div>
+                </label>
+                <label>移动阈值 <input id="tcMaxMoveChars" type="number" min="20" max="2000" value="120" /></label>
+                <label>标点处理 <select id="tcMovePunctuation"><option value="on">开启</option><option value="off">关闭</option></select></label>
+              </div>
+              <div class="option-grid two">
+                <label><input type="checkbox" id="tcMoveOverwrite" checked /> 覆盖</label>
+                <label><input type="checkbox" id="tcMoveBackup" checked /> 备份</label>
+              </div>
+              <div class="action-grid single">
+                <button class="pixel-btn primary" data-run="clean_text" data-scope="move">修复句子</button>
+              </div>
+            </section>
+          </article>
+        </section>
+
+        <section class="view-panel" data-panel="crawler">
+          <article class="pixel-card form-card">
+            <div class="form-grid">
+              <label class="field full">小说目录链接 <input id="nsUrl" type="password" autocomplete="off" placeholder="支持站点小说目录页 URL" /></label>
+              <label class="field full">输出 TXT
+                <div class="file-row"><input id="nsOutput" placeholder="自动生成 / 选择文件" /><button class="pixel-btn" data-choose="save" data-target="nsOutput" data-config="web_crawler.outputFile">选择</button></div>
+              </label>
+              <label>起始章节 <input id="nsStart" type="number" min="1" value="1" /></label>
+              <label>结束章节 <input id="nsEnd" type="number" min="1" placeholder="留空到最后" /></label>
+              <label>并发数 <input id="nsWorkers" type="number" min="1" max="24" value="16" /></label>
+              <label>超时秒数 <input id="nsTimeout" type="number" min="3" value="25" /></label>
+              <label>最小间隔 <input id="nsDelayMin" type="number" min="0" step="0.05" value="0.12" /></label>
+              <label>最大间隔 <input id="nsDelayMax" type="number" min="0" step="0.05" value="0.35" /></label>
+              <label>重试次数 <input id="nsRetries" type="number" min="0" value="3" /></label>
+            </div>
+            <div class="option-grid two">
+              <label><input type="checkbox" id="nsHtmlFallback" checked /> HTML 兜底</label>
+              <label><input type="checkbox" id="nsDetailedLog" /> 详细日志</label>
+            </div>
+            <div class="action-grid two-buttons">
+              <button class="pixel-btn primary" data-run="web_crawler">开始抓取</button>
+              <button class="pixel-btn" data-run="web_crawler_stop">停止抓取</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-panel="character_material">
+          <article class="pixel-card form-card">
+            <div class="form-grid">
+              <label class="field full">小说 TXT
+                <div class="file-row"><input id="cmSource" placeholder="选择完整小说 TXT" /><button class="pixel-btn" data-choose="file" data-target="cmSource" data-config="character_material.source">选择</button></div>
+              </label>
+              <label class="field full">输出目录
+                <div class="file-row"><input id="cmOutputDir" placeholder="自动生成 / 选择目录" /><button class="pixel-btn" data-choose="folder" data-target="cmOutputDir" data-config="character_material.outputDir">选择</button></div>
+              </label>
+              <label>模型平台 <select id="cmPlatform"><option value="deepseek">DeepSeek</option><option value="openai">OpenAI</option><option value="local">本地</option></select></label>
+              <label>API Key <input id="cmApiKey" type="password" placeholder="可留空，读取环境变量" /></label>
+              <label>Base URL <input id="cmBaseUrl" type="password" autocomplete="off" placeholder="OpenAI 兼容接口地址" /></label>
+              <label>模型名称 <input id="cmModelName" placeholder="deepseek-v4-flash / gpt-4o-mini" /></label>
+              <label>温度 <input id="cmTemperature" type="number" min="0" max="2" step="0.1" value="0.2" /></label>
+              <label>人物 / 对象 <input id="cmCharacterTarget" placeholder="林恒 / 云瑶 / 环境 / 所有人物" /></label>
+              <label>关键词 <input id="cmKeyword" placeholder="嚣张语气对话 / 吃醋嘴硬 / 打斗动作" /></label>
+              <label>单章 <input id="cmChapter" type="number" min="1" placeholder="可空" /></label>
+              <label>起始章 <input id="cmStart" type="number" min="1" placeholder="可空" /></label>
+              <label>结束章 <input id="cmEnd" type="number" min="1" placeholder="可空" /></label>
+              <label>并发数 <input id="cmWorkers" type="number" min="1" max="16" value="4" /></label>
+            </div>
+            <div class="option-grid two">
+              <label><input type="checkbox" id="cmAll" checked /> 全部章节</label>
+              <label><input type="checkbox" id="cmConcurrent" checked /> 并发抽取</label>
+            </div>
+            <div class="action-grid two-buttons">
+              <button class="pixel-btn primary" data-run="character_material">开始抽取</button>
+              <button class="pixel-btn" data-run="character_material_stop">停止抽取</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="view-panel" data-panel="current_plot">
+          <article class="pixel-card form-card">
+            <div class="form-grid">
+              <label class="field full">小说
+                <div class="file-row"><input id="cpSource" placeholder="选择完整小说" /><button class="pixel-btn" data-choose="file" data-target="cpSource" data-config="current_plot.source">选择</button></div>
+              </label>
+              <label class="field full">已有当前剧情
+                <div class="file-row"><input id="cpCurrentPlotFile" placeholder="选择已有当前剧情" /><button class="pixel-btn" data-choose="file" data-target="cpCurrentPlotFile" data-config="current_plot.currentPlotFile">选择</button></div>
+              </label>
+              <label class="field full">输出目录
+                <div class="file-row"><input id="cpOutputDir" placeholder="自动生成 / 选择目录" /><button class="pixel-btn" data-choose="folder" data-target="cpOutputDir" data-config="current_plot.outputDir">选择</button></div>
+              </label>
+              <label class="field full">输出文件
+                <div class="file-row"><input id="cpOutputFile" placeholder="自动命名 / 选择输出文件" /><button class="pixel-btn" data-choose="save" data-target="cpOutputFile" data-config="current_plot.outputFile">选择</button></div>
+              </label>
+              <label>模型配置 <select id="cpPlatform"><option value="deepseek">DeepSeek</option><option value="openai">OpenAI</option><option value="local">本地</option></select></label>
+              <label>API Key <input id="cpApiKey" type="password" placeholder="可留空，读取环境变量" /></label>
+              <label>Base URL <input id="cpBaseUrl" type="password" autocomplete="off" placeholder="OpenAI 兼容接口地址" /></label>
+              <label>模型名称 <input id="cpModelName" placeholder="deepseek-v4-flash / gpt-4o-mini" /></label>
+              <label>温度 <input id="cpTemperature" type="number" min="0" max="2" step="0.1" value="0.2" /></label>
+              <label>单章 <input id="cpChapter" type="number" min="1" placeholder="章节号" /></label>
+              <label>前后章 <input id="cpAroundChapter" type="number" min="1" placeholder="当前章" /></label>
+              <label>范围开始 <input id="cpStart" type="number" min="1" placeholder="起始章" /></label>
+              <label>范围结束 <input id="cpEnd" type="number" min="1" placeholder="留空到最后" /></label>
+              <label>总结模式 <select id="cpMode"><option value="serial">逐章精修</option><option value="extract_merge">并发合并</option><option value="fast_preview">快速预览</option></select></label>
+              <label>摘要目标字数 <input id="cpTargetWords" type="number" min="80" max="500" value="260" /></label>
+              <label>参考章节数 <input id="cpRecentContext" type="number" min="0" max="20" value="5" /></label>
+              <label>并发数 <input id="cpWorkers" type="number" min="1" max="16" value="4" /></label>
+            </div>
+            <div class="option-grid two"><label><input type="checkbox" id="cpReplaceExisting" checked /> 覆盖已有章节摘要</label></div>
+            <div class="action-grid">
+              <button class="pixel-btn" data-run="current_plot" data-scope="single">总结单章</button>
+              <button class="pixel-btn" data-run="current_plot" data-scope="around">总结前后</button>
+              <button class="pixel-btn primary" data-run="current_plot" data-scope="range">总结范围</button>
+              <button class="pixel-btn" data-run="current_plot_stop">停止总结</button>
+            </div>
+          </article>
+        </section>
+
+        <article class="console-card">
+          <div class="console-shell">
+            <div class="console-tools">
+              <button type="button" id="copyConsole">复制</button>
+              <button type="button" id="clearConsole">清空</button>
+            </div>
+            <pre id="consoleOutput"></pre>
+          </div>
+        </article>
+      </main>
     </div>
-
-    <div class="theme-modal" id="themeModal" aria-hidden="true">
-      <div class="theme-box">
-        <div class="theme-head">
-          <b>系统外观定制</b>
-          <button id="themeClose" type="button">×</button>
-        </div>
-        <div class="theme-grid">
-          <button data-theme="blue"><i class="blue"></i><span>企业蓝</span></button>
-          <button data-theme="black"><i class="black"></i><span>极夜黑</span></button>
-          <button data-theme="emerald"><i class="emerald"></i><span>薄荷绿</span></button>
-          <button data-theme="amber"><i class="amber"></i><span>事务金</span></button>
-          <button data-theme="rose"><i class="rose"></i><span>玫瑰粉</span></button>
-          <button data-theme="violet"><i class="violet"></i><span>深空紫</span></button>
-        </div>
-      </div>
-    </div>
-
-    <script src="assets/core/ui_page_registry.js"></script>
-    <script src="assets/core/ui_form_controls.js"></script>
-    <script src="assets/core/ui_state_store.js"></script>
-    <script src="assets/core/ui_task_panel.js"></script>
-    <script src="assets/core/ui_novel_splitter.js"></script>
-    <script src="assets/core/ui_character_material.js"></script>
-    <script src="assets/core/ui_current_plot.js"></script>
-    <script src="assets/core/ui_webnovel_writer.js"></script>
-    <script src="assets/pages/novel_processor_page.js"></script>
-    <script src="assets/pages/fanqie_syncer_page.js"></script>
-    <script src="assets/pages/fanqie_publisher_page.js"></script>
-    <script src="assets/pages/novel_crawler_page.js"></script>
-    <script src="assets/pages/character_material_page.js"></script>
-    <script src="assets/pages/current_plot_page.js"></script>
-    <script src="assets/pages/webnovel_writer_page.js"></script>
     <script src="assets/app.js"></script>
   </body>
 </html>

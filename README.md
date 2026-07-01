@@ -54,7 +54,6 @@ FANQIE Novel PUBLISH SYNC ASSISTANT | Novel Processing
 FANQIE Novel PUBLISH SYNC ASSISTANT | Web Crawling
 FANQIE Novel PUBLISH SYNC ASSISTANT | Character Material
 FANQIE Novel PUBLISH SYNC ASSISTANT | Current Plot
-FANQIE Novel PUBLISH SYNC ASSISTANT | Web Novel Writing
 ```
 
 More specifically:
@@ -65,7 +64,6 @@ More specifically:
 * **Web Crawling**: fetches chapters, saves them as TXT, and cleans up the messy stuff along the way.
 * **Character Material**: organizes character materials and helps turn them into reusable prompt-ready notes.
 * **Current Plot**: manages current-plot context files so the next chapter can stay aligned with what is happening now.
-* **Web Novel Writing**: plans outlines, chapter blueprints, chapter drafting, review gates, and local story-state updates.
 
 That is pretty much it.
 
@@ -178,7 +176,6 @@ FANQIE Novel PUBLISH SYNC ASSISTANT | 小说处理
 FANQIE Novel PUBLISH SYNC ASSISTANT | 网页抓取
 FANQIE Novel PUBLISH SYNC ASSISTANT | 角色素材
 FANQIE Novel PUBLISH SYNC ASSISTANT | 当前剧情
-FANQIE Novel PUBLISH SYNC ASSISTANT | 网文写作
 ```
 
 至于更具体的？
@@ -189,7 +186,6 @@ FANQIE Novel PUBLISH SYNC ASSISTANT | 网文写作
 * **网页抓取**：抓章节、存 TXT、顺便清理一下乱七八糟的东西。
 * **角色素材**：整理角色资料，把人物设定转成更方便复用的提示词素材。
 * **当前剧情**：管理当前剧情上下文，让下一章能接得上前文正在发生的事。
-* **网文写作**：管理小说项目目录、小说 TXT、设定文件，并执行大纲、蓝图、写章、审查和状态回写流程。
 
 就这样。
 

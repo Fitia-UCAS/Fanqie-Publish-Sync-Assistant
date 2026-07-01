@@ -417,12 +417,12 @@ class CurrentPlotService:
                 continue
             fact = by_number.get(chapter_number, {})
             title = str(fact.get("chapter_title") or fact.get("chapterTitle") or f"第{chapter_number}章")
-            fake_chapter = _MinimalChapter(number=chapter_number, heading=title)
+            fake_chapter = _ChapterRecord(number=chapter_number, heading=title)
             items.append(self._row_to_summary(chapter_row, fake_chapter, novel_name))
         return sorted(items, key=lambda item: item.chapter_index)
 
     @staticmethod
-    def _row_to_summary(row: dict[str, Any], chapter: Chapter | "_MinimalChapter", novel_name: str) -> CurrentPlotChapterSummary:
+    def _row_to_summary(row: dict[str, Any], chapter: Chapter | "_ChapterRecord", novel_name: str) -> CurrentPlotChapterSummary:
         summary = _normalize_summary(str(row.get("chapter_summary") or row.get("summary") or "").strip(), chapter)
         if not summary:
             raise ValueError(f"第 {chapter.number} 章模型返回缺少 chapter_summary")
@@ -485,7 +485,7 @@ class CurrentPlotService:
         write_jsonl(debug_path, [item.to_dict() for item in processed])
 
 
-class _MinimalChapter:
+class _ChapterRecord:
     def __init__(self, number: int, heading: str) -> None:
         self.number = number
         self.heading = heading
@@ -583,7 +583,7 @@ def _render_recent_summaries(summaries: dict[int, str], chapter_number: int, rec
     return "\n\n".join(summaries[key] for key in selected)
 
 
-def _normalize_summary(summary: str, chapter: Chapter | _MinimalChapter) -> str:
+def _normalize_summary(summary: str, chapter: Chapter | _ChapterRecord) -> str:
     text = _compact_block(summary)
     if not text:
         return ""
