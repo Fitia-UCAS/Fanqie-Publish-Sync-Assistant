@@ -13,9 +13,6 @@ from backend.paths import (
     ensure_data_directories,
 )
 
-CONFIG_SCHEMA_VERSION = 3
-SECRET_SCHEMA_VERSION = 1
-
 
 WORKFLOW_SECTIONS: tuple[str, ...] = (
     "process_novel",
@@ -46,8 +43,8 @@ RECENT_INPUT_KEYS_BY_SECTION: dict[str, set[str]] = {
 }
 
 DEFAULT_CONFIG: dict[str, Any] = {
-    "schemaVersion": CONFIG_SCHEMA_VERSION,
     "activePage": "auto_publish",
+    "showPersonalPages": True,
     "process_novel": {
         "novelFile": "",
         "batchFolder": "",
@@ -243,12 +240,12 @@ def _load_split_config() -> dict[str, Any]:
 
 def _split_config_for_storage(config: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
     app_data: dict[str, Any] = {
-        "schemaVersion": CONFIG_SCHEMA_VERSION,
         "activePage": config.get("activePage", DEFAULT_CONFIG["activePage"]),
+        "showPersonalPages": config.get("showPersonalPages", DEFAULT_CONFIG["showPersonalPages"]),
     }
-    workflow_data: dict[str, Any] = {"schemaVersion": CONFIG_SCHEMA_VERSION}
-    recent_data: dict[str, Any] = {"schemaVersion": CONFIG_SCHEMA_VERSION}
-    secret_data: dict[str, Any] = {"schemaVersion": SECRET_SCHEMA_VERSION}
+    workflow_data: dict[str, Any] = {}
+    recent_data: dict[str, Any] = {}
+    secret_data: dict[str, Any] = {}
 
     for section in WORKFLOW_SECTIONS:
         value = config.get(section)
@@ -274,7 +271,7 @@ def _split_config_for_storage(config: dict[str, Any]) -> tuple[dict[str, Any], d
             secret_data[section] = secret_section
 
     for key, value in config.items():
-        if key not in {"schemaVersion", "activePage", *WORKFLOW_SECTIONS}:
+        if key not in {"activePage", *WORKFLOW_SECTIONS}:
             app_data[key] = deepcopy(value)
 
     return app_data, workflow_data, recent_data, secret_data
@@ -316,6 +313,5 @@ def _write_json(path: Path, data: dict[str, Any]) -> None:
 def _merge_default(data: dict[str, Any]) -> dict[str, Any]:
     config = deepcopy(DEFAULT_CONFIG)
     deep_update(config, data if isinstance(data, dict) else {})
-    config["schemaVersion"] = CONFIG_SCHEMA_VERSION
     return config
 

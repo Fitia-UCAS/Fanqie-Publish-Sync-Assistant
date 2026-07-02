@@ -9,8 +9,6 @@ from backend.paths import RUNS_DIR
 from backend.json_files import append_jsonl, read_json, write_json
 from backend.workspaces import workspace_dir
 
-RUN_SCHEMA_VERSION = 2
-
 
 def begin_run(*, workflow: str, page: str, input_payload: dict[str, Any] | None = None, workspace_id: str = "") -> Path:
     started_at = datetime.now().isoformat(timespec="seconds")
@@ -19,7 +17,6 @@ def begin_run(*, workflow: str, page: str, input_payload: dict[str, Any] | None 
     write_json(
         run_dir / "task.json",
         {
-            "schemaVersion": RUN_SCHEMA_VERSION,
             "runId": run_id,
             "workspaceId": workspace_id,
             "workflow": workflow,
@@ -70,7 +67,6 @@ def _write_global_index(*, run_id: str, workspace_id: str, workflow: str, page: 
     append_jsonl(
         RUNS_DIR / "index.jsonl",
         {
-            "schemaVersion": RUN_SCHEMA_VERSION,
             "runId": run_id,
             "workspaceId": workspace_id,
             "workflow": workflow,

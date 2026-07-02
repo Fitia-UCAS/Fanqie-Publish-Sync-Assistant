@@ -12,6 +12,7 @@ from backend.novel.source import parse_chapter_source
 from backend.novel.chapters import Chapter as PreviewChapter
 from backend.actions.clean import clean_text
 from backend.actions.crawl import crawl_chapters, preview_crawl_output
+from backend.actions.login import start_login
 from backend.actions.process import analyze_novel_file, process_novel
 from backend.actions.split import preview_novel_split_output, split_novel
 from backend.actions.publish import publish_chapters
@@ -132,12 +133,12 @@ class WebviewRouter:
         return FANQIE_AUTH_STATE_FILE.exists()
 
     def do_login(self) -> bool:
-        self._bridge.emit_log("auto_publish", "请在下一次自动打开的浏览器中完成登录；登录成功后会保存到当前账号的 state JSON。", "info")
+        start_login(self._bridge.emit_log)
         return True
 
     def reset_login(self) -> dict[str, Any]:
         result = reset_login_state()
-        self._bridge.emit_log("auto_publish", str(result.get("message") or "已重置授权。"), "warning" if result.get("ok") else "error")
+        self._bridge.emit_log("system", str(result.get("message") or "已重置授权。"), "warning" if result.get("ok") else "error")
         return result
 
 

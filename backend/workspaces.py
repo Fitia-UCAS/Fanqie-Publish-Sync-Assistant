@@ -8,9 +8,6 @@ from typing import Any
 from backend.paths import WORKSPACES_DIR
 from backend.json_files import read_json, write_json
 
-WORKSPACE_SCHEMA_VERSION = 2
-CHAPTER_MAP_SCHEMA_VERSION = 1
-
 
 def workspace_id_from_payload(payload: dict[str, Any] | None) -> str:
     payload = payload or {}
@@ -33,7 +30,6 @@ def ensure_workspace_for_payload(payload: dict[str, Any] | None, *, workflow: st
     existing = read_json(path / "novel.json")
     data = {
         **existing,
-        "schemaVersion": WORKSPACE_SCHEMA_VERSION,
         "id": workspace_id,
         "title": existing.get("title") or _infer_title(payload),
         "source": _source_descriptor(payload),
@@ -70,7 +66,7 @@ def load_workspace(workspace_id: str) -> dict[str, Any]:
 
 
 def save_workspace(workspace_id: str, data: dict[str, Any]) -> Path:
-    payload = {"schemaVersion": WORKSPACE_SCHEMA_VERSION, **data, "id": workspace_id}
+    payload = {**data, "id": workspace_id}
     path = workspace_dir(workspace_id) / "novel.json"
     write_json(path, payload)
     return path
@@ -79,7 +75,7 @@ def save_workspace(workspace_id: str, data: dict[str, Any]) -> Path:
 def ensure_chapter_map(workspace_id: str) -> Path:
     path = workspace_dir(workspace_id) / "chapter_map.json"
     if not path.exists():
-        write_json(path, {"schemaVersion": CHAPTER_MAP_SCHEMA_VERSION, "novelId": workspace_id, "chapters": []})
+        write_json(path, {"novelId": workspace_id, "chapters": []})
     return path
 
 

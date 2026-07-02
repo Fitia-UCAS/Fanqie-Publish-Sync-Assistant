@@ -173,6 +173,30 @@ body[data-current-view="crawler"] .view-panel[data-panel="crawler"],
 body[data-current-view="character_notes"] .view-panel[data-panel="character_notes"],
 body[data-current-view="plot_notes"] .view-panel[data-panel="plot_notes"] { display: block; }
 
+.auth-card { padding: 12px; }
+.auth-file-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.auth-file-row input {
+  grid-column: span 2;
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 12px;
+  box-shadow: 3px 3px 0 var(--border-soft);
+}
+.auth-file-row button {
+  min-height: 30px;
+  font-size: 12px;
+  box-shadow: 3px 3px 0 var(--border-main);
+}
+.auth-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
 .pixel-card {
   width: 100%;
   padding: 22px;

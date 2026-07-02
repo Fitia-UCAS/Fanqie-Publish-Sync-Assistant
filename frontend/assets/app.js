@@ -1,7 +1,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const PATH_FIELDS = new Set([
-    'apNovelFile', 'apAuthStatePath', 'syNovelFile', 'syAuthStatePath',
+    'apNovelFile', 'apAuthStatePath', 'syNovelFile',
     'exNovelFile', 'exOutputFile', 'exBatchFolder', 'spInputFile', 'spOutputDir',
     'tcAdInput', 'tcAdFolder', 'tcMoveInput', 'tcMoveFolder', 'nsOutput',
     'cmSource', 'cmOutputDir', 'cpSource', 'cpPlotNotesFile', 'cpOutputDir', 'cpOutputFile'
@@ -69,7 +69,10 @@
     localStorage.setItem('fanqieUiTheme', style);
     document.querySelectorAll('[data-theme-style]').forEach((button) => button.classList.toggle('active', button.dataset.themeStyle === style));
   };
+  const isPersonalView = (view) => ['process', 'crawler', 'character_notes', 'plot_notes'].includes(view);
   const setView = (view) => {
+    const showPersonal = state.config?.showPersonalPages !== false;
+    if (!showPersonal && isPersonalView(view)) return;
     document.body.dataset.currentView = view;
     document.querySelectorAll('[data-view]').forEach((button) => button.classList.toggle('active', button.dataset.view === view));
     saveConfig({ activePage: ({ publish: 'auto_publish', sync: 'chapter_sync', process: 'process_novel', crawler: 'web_crawler' }[view] || view) }).catch(() => {});
@@ -92,9 +95,19 @@
     select.innerHTML = Object.entries(items).map(([key, label]) => `<option value="${key}">${label}</option>`).join('');
     if (current) select.value = current;
   };
+  const togglePersonalElements = (show) => {
+    document.querySelectorAll('[data-personal]').forEach((el) => {
+      el.classList.toggle('hidden', !show);
+    });
+    if (!show) {
+      const view = document.body.dataset.currentView;
+      if (isPersonalView(view)) setView('publish');
+    }
+  };
   const fillFromState = (nextState) => {
     state = nextState || { config: {} };
     const config = state.config || {};
+    togglePersonalElements(config.showPersonalPages !== false);
     const ap = config.auto_publish || {};
     const sy = config.chapter_sync || {};
     const pn = config.process_novel || {};
@@ -156,10 +169,18 @@
 
     if (state.logTail && !consoleOutput.textContent.trim()) replaceConsole(state.logTail);
   };
+  const updateLoginStatus = async () => {
+    try {
+      const loggedIn = await callApi('check_login_state');
+      if (loggedIn) log('检测到有效的 state.json，已登录。', 'success');
+      else log('未检测到 state.json，需要登录。', 'warn');
+    } catch { }
+  };
   const refresh = async () => {
     try {
       fillFromState(await callApi('get_state'));
       if (!consoleOutput.textContent.trim()) replaceConsole('已连接后端，等待任务日志。');
+      updateLoginStatus();
     } catch (error) {
       replaceConsole(lineText(error.message, 'warn'));
     }
@@ -275,6 +296,15 @@
         const payload = collectPlotPayload(button.dataset.scope || 'range');
         await saveConfig({ plot_notes: payload });
         log(await callApi('plot_notes_run', payload) ? '当前剧情总结已启动。' : '当前剧情总结未启动。', 'success');
+      } else if (run === 'do_login') {
+        await callApi('do_login');
+      } else if (run === 'check_login_state') {
+        updateLoginStatus();
+        log('登录状态已检测。', 'success');
+      } else if (run === 'reset_login') {
+        const result = await callApi('reset_login');
+        updateLoginStatus();
+        log(result?.message || '已重置登录授权。', 'warning');
       } else {
         const ok = await callApi(run);
         log(ok ? '操作已提交。' : '当前没有可处理任务。', ok ? 'success' : 'warn');
@@ -289,6 +319,36 @@
       log(await callApi('process_novel_run', payload) ? '小说处理任务已启动。' : '小说处理任务未启动。', 'success');
     } catch (error) { log(error.message, 'error'); }
   }));
+
+  let saveTimer = null;
+  const SCHEDULE_DEBOUNCE = 600;
+  const FORM_SECTIONS = { ap: 'auto_publish', sy: 'chapter_sync' };
+  const scheduleSave = (prefix) => {
+    setTimeout(() => {
+      const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || 'publish');
+      saveConfig({ [FORM_SECTIONS[prefix]]: payload }).catch(() => {});
+    }, SCHEDULE_DEBOUNCE);
+  };
+  document.querySelectorAll('[data-panel="publish"] input, [data-panel="publish"] select, [data-panel="sync"] input, [data-panel="sync"] select').forEach((el) => {
+    const id = el.id;
+    const prefix = id && id.match(/^(ap|sy)/)?.[1];
+    if (!prefix) return;
+    const section = FORM_SECTIONS[prefix];
+    el.addEventListener('input', () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || 'publish');
+        saveConfig({ [section]: payload }).catch(() => {});
+      }, SCHEDULE_DEBOUNCE);
+    });
+    el.addEventListener('change', () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || 'publish');
+        saveConfig({ [section]: payload }).catch(() => {});
+      }, SCHEDULE_DEBOUNCE);
+    });
+  });
 
   setStyle(['pixel', 'night'].includes(localStorage.getItem('fanqieUiTheme')) ? localStorage.getItem('fanqieUiTheme') : 'pixel');
   setView('publish');

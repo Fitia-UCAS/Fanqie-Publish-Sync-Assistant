@@ -19,11 +19,23 @@
         <nav class="pixel-nav" aria-label="功能导航">
           <button class="active" data-view="publish"><span class="nav-icon">↑</span>番茄发布</button>
           <button data-view="sync"><span class="nav-icon">↓</span>番茄同步</button>
-          <button data-view="process"><span class="nav-icon">▤</span>小说处理</button>
-          <button data-view="crawler"><span class="nav-icon">⌁</span>网页抓取</button>
-          <button data-view="character_notes"><span class="nav-icon">◆</span>角色素材</button>
-          <button data-view="plot_notes"><span class="nav-icon">◇</span>当前剧情</button>
+          <button data-view="process" data-personal><span class="nav-icon">▤</span>小说处理</button>
+          <button data-view="crawler" data-personal><span class="nav-icon">⌁</span>网页抓取</button>
+          <button data-view="character_notes" data-personal><span class="nav-icon">◆</span>角色素材</button>
+          <button data-view="plot_notes" data-personal><span class="nav-icon">◇</span>当前剧情</button>
         </nav>
+
+        <section class="sidebar-card auth-card" aria-label="登录状态">
+          <div class="auth-file-row">
+            <input id="apAuthStatePath" placeholder="默认 state.json" />
+            <button class="pixel-btn tiny" data-choose="auth" data-target="apAuthStatePath" data-config="auto_publish.authStatePath">选择</button>
+          </div>
+          <div class="auth-actions">
+            <button class="pixel-btn tiny" data-run="do_login">登录</button>
+            <button class="pixel-btn tiny" data-run="check_login_state">检测</button>
+            <button class="pixel-btn tiny" data-run="reset_login">重置</button>
+          </div>
+        </section>
 
         <section class="sidebar-card theme-card" aria-label="主题切换">
           <div class="theme-switch">
@@ -41,9 +53,6 @@
                 <div class="file-row"><input id="apNovelFile" placeholder="选择或粘贴本地 TXT 路径" /><button class="pixel-btn" data-choose="source" data-target="apNovelFile" data-config="auto_publish.novelFile">选择</button></div>
               </label>
               <label class="field full">章节管理 URL <input id="apUrl" type="password" autocomplete="off" placeholder="https://fanqienovel.com/ 或章节管理页面 URL" /></label>
-              <label class="field full">登录状态
-                <div class="file-row"><input id="apAuthStatePath" placeholder="默认 state.json" /><button class="pixel-btn" data-choose="auth" data-target="apAuthStatePath" data-config="auto_publish.authStatePath">选择</button></div>
-              </label>
               <label class="field">起始章节 <input id="apStart" type="number" min="1" value="1" /></label>
               <label class="field">结束章节 <input id="apEnd" type="number" min="1" value="1" /></label>
             </div>
@@ -80,9 +89,6 @@
                 <div class="file-row"><input id="syNovelFile" placeholder="选择或粘贴本地 TXT 路径" /><button class="pixel-btn" data-choose="source" data-target="syNovelFile" data-config="chapter_sync.novelFile">选择</button></div>
               </label>
               <label class="field full">章节管理 URL <input id="syUrl" type="password" autocomplete="off" placeholder="https://fanqienovel.com/ 或章节管理页面 URL" /></label>
-              <label class="field full">登录状态
-                <div class="file-row"><input id="syAuthStatePath" placeholder="默认 state.json" /><button class="pixel-btn" data-choose="auth" data-target="syAuthStatePath" data-config="chapter_sync.authStatePath">选择</button></div>
-              </label>
               <label class="field">起始章节 <input id="syStart" type="number" min="1" value="1" /></label>
               <label class="field">结束章节 <input id="syEnd" type="number" min="1" value="1" /></label>
             </div>
@@ -114,7 +120,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="process">
+        <section class="view-panel" data-panel="process" data-personal>
           <article class="pixel-card form-card process-stack">
             <section class="tool-block">
               <div class="form-grid">
@@ -217,7 +223,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="crawler">
+        <section class="view-panel" data-panel="crawler" data-personal>
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说目录链接 <input id="nsUrl" type="password" autocomplete="off" placeholder="支持站点小说目录页 URL" /></label>
@@ -243,7 +249,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="character_notes">
+        <section class="view-panel" data-panel="character_notes" data-personal>
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说 TXT
@@ -275,7 +281,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="plot_notes">
+        <section class="view-panel" data-panel="plot_notes" data-personal>
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说
