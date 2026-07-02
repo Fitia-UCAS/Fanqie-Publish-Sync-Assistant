@@ -178,7 +178,7 @@ FANQIE Novel PUBLISH SYNC ASSISTANT | 角色素材
 FANQIE Novel PUBLISH SYNC ASSISTANT | 当前剧情
 ```
 
-至于更具体的？
+具体一点点的？
 
 * **番茄发布**：把本地章节送进番茄后台，少点一点是一点。
 * **番茄同步**：本地和网页章节对一对，不一致就揪出来。
@@ -189,8 +189,13 @@ FANQIE Novel PUBLISH SYNC ASSISTANT | 当前剧情
 
 就这样。
 
+至于更具体的？
+emmm......
+雀食没有哇~
+
 不是我不想写说明书，主要是——
 这东西一运行，基本就知道咋用了。
+鹅且，现在有辣么多ai，问问就差不多知道嘞。
 
 ```bash
 python main.py
@@ -253,37 +258,73 @@ python main.py
 
 ---
 
-## 当前后端结构
+## 后端结构
 
 ```txt
 backend/
-  api/             # pywebview 暴露给桌面端/前端的入口层
-  actions/         # 前端按钮触发的场景入口：发布、同步、抓取、清洗、拆分
-  publishing/      # 发布流程：本地章节读取、打开编辑器、提交、结果记录
-  syncing/         # 同步流程：远端目录、差异检查、覆盖应用、结果记录
-  crawling/        # 网页抓取、限流、站点适配和 TXT 写出
-  fanqie_web/      # 番茄网页端 Playwright 操作和平台字数规则
-  novel/           # 小说章节、正文清洗、格式化、切分和本地 TXT 改写
-  story_analysis/  # 剧情/角色分析：角色语料抽取、当前剧情摘要、LLM 提示词
-  tasks/           # 任务回调、事件、运行结果和前端日志摘要
+  ├── api/                # pywebview JS→Python 桥接层（30+ API 方法、前端事件推送、本地文件对话框）
+  ├── actions/            # 前端按钮触发的 6 个场景入口：publish / sync / process / split / crawl / clean
+  │
+  ├── publishing/         # 发布流程：flow → batch → chapter（逐章）、local_source、plan、editor、artifacts、outcome
+  ├── syncing/            # 同步流程：flow → batch → chapter、remote_catalog、local_source、content_check、apply、plan
+  ├── crawling/           # 网页抓取引擎：crawler（多阶段退避）、chapter_fetch（并发）、http（限流/重试）、
+  │   │                   # rate_limit、txt_writer（增量）、write_order（有序缓冲）、sites/（3 个站点适配器）
+  │   └── sites/          #   lanmeiwen / renrenreshu / xsbook / adapter_contract / registry / page_text
+  ├── fanqie_web/         # 番茄小说后台 Playwright 自动化：browser_session、submission（多步提交流程）、
+  │   │                   # open_editor、open_chapter、chapter_list、form_fields、text_entry、schedule 相关、diff_report
+  │   ├── submission.py   #   多步发布/同步提交流程（下一步→设置→定时→AI→确认）
+  │   └── submission_dialogs.py  # 弹窗检测（查重、错别字、每日上限、确认发布等）
+  │
+  ├── novel/              # 文本处理核心：reader（正则中文章节解析）、chapters、source、formatting、
+  │   │                   # text_cleaning、ad_cleaner、sentence_fixer、file_rewrite、splitter
+  │   └── reader.py       #   支持阿拉伯/全角/中文数字章节号解析
+  ├── story_analysis/     # LLM 驱动分析：extract_characters（角色素材抽取）、summarize_plot（3 模式剧情摘要）、
+  │   │                   # llm（OpenAI 兼容客户端）、platforms（DeepSeek/OpenAI/硅基流动/月之暗面/自定义）、
+  │   │                   # material_prompts / summary_prompts / plot_markdown / chapter_files
+  │   └── platforms.py    #   多平台配置，API Key 从环境变量或 secrets 读取
+  │
+  ├── tasks/              # 任务生命周期管理：registry（busy/stop/pause 三态）、callbacks（回调集）、
+  │   │                   # events（类型化事件）、outcome（统一返回）、fanqie_log / crawler_log（日志摘要）
+  │   └── registry.py     #   线程安全的任务启停，支持暂停/继续
+  │
+  ├── settings.py         # 配置 CRUD，按敏感度拆分到 4 个 JSON 文件（app / workflow_defaults / recent_inputs / llm.local）
+  ├── paths.py            # 50+ 数据目录/文件路径常量
+  ├── defaults.py         # 环境变量默认值（浏览器通道、视口、默认 URL 等）
+  ├── errors.py           # 异常层次：AppError → ConfigError / ChapterParseError / PlatformError / BrowserError 等
+  ├── form_inputs.py      # 表单输入校验（required_text_file / chapter_range / required_chapter_source）
+  ├── json_files.py       # JSON/JSONL 读写，自动序列化 Path/dataclass
+  ├── text_files.py       # 多编码文本读取（UTF-8 → GB18030 → Big5），备份写入
+  ├── filenames.py        # 安全文件名（替换非法字符、处理 Windows 保留名）
+  ├── workspaces.py       # 小说工作空间管理（SHA1 标识、章节映射）
+  ├── runs.py             # 执行记录追踪（begin_run / append_run_event / finish_run），JSONL 事件索引
+  ├── log_setup.py        # 应用日志初始化
+  └── data_reset.py       # 运行时数据清理（Windows 权限修复 + 重试）
 ```
 
-依赖方向：`api -> actions -> 业务目录 / fanqie_web`。业务目录不反向依赖 `api` 或 `actions`，这条规则由测试保护。
+依赖方向：`api → actions → 业务模块`，业务模块不反向依赖 `api` 或 `actions`，由 `test_backend_architecture.py` 测试保护。
 
-本地数据统一放在 `data/` 下，并按责任拆分：
+本地数据统一放在 `data/` 下，按责任拆分：
 
 ```txt
 data/
-  settings/          # 应用设置、工作流默认值、最近输入
-  secrets/           # 本地密钥，不提交、不打包
-  auth/              # 番茄账号与浏览器登录态，不提交、不打包
-  runtime/           # 浏览器运行态
-  system/            # 应用级日志和调试产物
-  publishing/        # 发布运行日志、备份、对比和快照
-  syncing/           # 同步运行日志、备份、对比和历史
-  crawling/          # 抓取输出、日志和备份
-  novel_processing/  # 小说整理/清洗/分割输出
-  story_analysis/    # 剧情/角色分析输出和章节缓存
-  workspaces/        # 小说项目、章节映射、项目内运行记录
-  runs/              # 全局运行索引
-```
+  ├── settings/          # 应用配置（app.json、workflow_defaults.json、recent_inputs.json）
+  ├── secrets/           # 本地密钥（llm.local.json），不提交、不打包
+  ├── auth/              # 番茄账号与浏览器登录态（state.json），不提交、不打包
+  ├── runtime/           # 浏览器运行数据
+  │   └── fanqie_web/    #   Playwright 浏览器资料夹
+  ├── system/            # 系统级日志和调试截图
+  │   ├── tasklogs/      #   应用日志
+  │   ├── backups/       #   系统备份
+  │   └── debug/         #   系统调试截图
+  ├── publishing/        # 发布运行日志、备份、对比报告、调试截图、Git 追踪
+  ├── syncing/           # 同步运行日志、备份、对比报告、调试截图、Git 追踪
+  ├── crawling/          # 抓取输出 TXT、日志、备份
+  ├── novel_processing/  # 小说整理/清洗/分割输出、备份、对比、调试
+  │   └── outputs/       #   处理结果输出
+  ├── story_analysis/    # 角色素材/剧情摘要输出、章节缓存、调试 JSONL
+  │   ├── chapters/      #   按章切分的小说片段
+  │   ├── outputs/       #   分析结果（JSONL / Markdown）
+  │   └── debug/         #   调试数据
+  ├── fanqie_web/        # 番茄网页自动化日志和调试截图
+  ├── workspaces/        # 小说工作空间（novel_<sha>/novel.json + chapter_map.json）
+  └── runs/              # 全局执行记录索引（JSONL）

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-PROJECT_DIR_NAME = "Fanqie-Publish-Sync-Assistant"
+PROJECT_DIR_NAME = "fanqie-publish-sync"
 
 
 def ensure_state_json(project_dir: Path) -> None:
@@ -31,7 +31,7 @@ def load_project_main(project_dir: Path):
     if not main_py.exists():
         raise FileNotFoundError(f"未找到项目启动文件：{main_py}")
 
-    spec = importlib.util.spec_from_file_location("fanqie_publish_sync_assistant_main", main_py)
+    spec = importlib.util.spec_from_file_location("fanqie_publish_sync_main", main_py)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"无法加载项目启动文件：{main_py}")
 

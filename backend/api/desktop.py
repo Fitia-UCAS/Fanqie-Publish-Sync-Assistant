@@ -157,17 +157,10 @@ def _normalize_dialog_result(result: Any, *, keep_multiple: bool = False) -> str
 
 
 def open_source_dialog(window: Any, *, current_path: str = "") -> str:
-    # Keep Fanqie source selection on the same stable native pywebview path as
-    # the working novel-processing page. pywebview supports folder dialogs, but
-    # file and folder selection are separate dialog modes; for this single
-    # compact button we use multi-file selection so each chapter can be a file.
     return open_native_dialog(window, save=False, folder=False, save_filename="novel.md", allow_multiple=True)
 
 
 def open_login_state_dialog(window: Any, *, current_path: str = "") -> str:
-    # Login state is an input path: choosing an existing state file must read it,
-    # not open a save dialog or ask whether to replace it. New state files are
-    # created by the login flow when no custom state file is selected.
     return open_native_dialog(window, save=False, folder=False, save_filename="state.json")
 
 

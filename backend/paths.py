@@ -6,7 +6,6 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT_DIR / "data"
 
-# Runtime configuration is stored under data/ and split by responsibility.
 CONFIG_DIR = DATA_DIR / "settings"
 CONFIG_FILE = CONFIG_DIR / "app.json"
 WORKFLOW_DEFAULTS_FILE = CONFIG_DIR / "workflow_defaults.json"

@@ -160,7 +160,7 @@ class PlotSummaryUpdater:
                 replace_existing,
                 max_workers,
             )
-        else:  # pragma: no cover - guarded by normalize_plot_mode
+        else:  # pragma: no cover
             raise ValueError(f"不支持的当前剧情总结档位：{mode}")
 
         if not processed and summaries:

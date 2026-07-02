@@ -317,7 +317,6 @@ def _is_low_value_content(content: str) -> bool:
         return all(ch in _LOW_VALUE_PUNCTUATION for ch in text)
     if normalized in _LOW_VALUE_NORMALIZED_CONTENTS:
         return True
-    # 只由感叹号、问号、省略号等组成的水句没有角色素材价值。
     return all(ch in "?!？！。…~～" for ch in normalized)
 
 

@@ -9,7 +9,7 @@ class StoryNotesClient:
     def __init__(self, runtime: StoryNotesRuntime) -> None:
         try:
             from openai import OpenAI
-        except Exception as exc:  # pragma: no cover - depends on optional runtime dependency.
+        except Exception as exc:  # pragma: no cover
             raise RuntimeError("缺少 openai 依赖，请先安装 requirements.txt 中的 openai。") from exc
 
         self.runtime = runtime

@@ -9,7 +9,7 @@ from pathlib import Path
 
 APP_NAME = "番茄发布同步助手"
 ROOT_DIR = Path(__file__).resolve().parents[1]
-SPEC_NAME = "Fanqie-Publish-Sync-Assistant.spec"
+SPEC_NAME = "fanqie-publish-sync.spec"
 
 
 def run(command: list[str]) -> None:
@@ -97,7 +97,7 @@ def build_executable() -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build FANQIE PUBLISH SYNC ASSISTANT as a Windows executable.")
+    parser = argparse.ArgumentParser(description="Build fanqie publish sync as a Windows executable.")
     parser.add_argument(
         "--skip-install",
         action="store_true",

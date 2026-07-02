@@ -6,7 +6,7 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT.parent / "Fanqie-Publish-Sync-Assistant.zip"
+OUTPUT = ROOT.parent / "fanqie-publish-sync.zip"
 EXCLUDED_PARTS = {
     "__pycache__",
     ".pytest_cache",

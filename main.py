@@ -7,7 +7,7 @@ from typing import Any
 
 try:
     import webview
-except Exception as exc:  # pragma: no cover - depends on local desktop env
+except Exception as exc:  # pragma: no cover
     raise SystemExit("缺少依赖：pywebview。请先执行：pip install -r requirements.txt") from exc
 
 from backend.api.webview import WebviewRouter
