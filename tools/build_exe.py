@@ -8,10 +8,12 @@ from pathlib import Path
 
 APP_NAME = "番茄发布与同步助手"
 ROOT_DIR = Path(__file__).resolve().parents[1]
+
 SPEC_NAME = "fanqie-publish-sync.spec"
 FRONTEND_ROOT = ROOT_DIR / "frontend"
 FRONTEND_VARIANTS = {"release", "personal"}
 DEFAULT_BUILD_FRONTEND_VARIANT = "release"
+
 RUNTIME_HOOK = ROOT_DIR / "tools" / "_pyinstaller_frontend_variant.py"
 
 
@@ -19,6 +21,13 @@ def run(command: list[str]) -> None:
     print()
     print("$", " ".join(command))
     subprocess.run(command, cwd=ROOT_DIR, check=True)
+
+
+def remove_path(path: Path) -> None:
+    if path.is_dir():
+        shutil.rmtree(path)
+    elif path.exists():
+        path.unlink()
 
 
 def remove_build_outputs() -> None:
@@ -29,18 +38,27 @@ def remove_build_outputs() -> None:
         ROOT_DIR / f"{APP_NAME}.spec",
         RUNTIME_HOOK,
     ):
-        if path.is_dir():
-            shutil.rmtree(path)
-        elif path.exists():
-            path.unlink()
+        remove_path(path)
+
+
+def remove_generated_build_files() -> None:
+    for path in (
+        ROOT_DIR / SPEC_NAME,
+        ROOT_DIR / f"{APP_NAME}.spec",
+        RUNTIME_HOOK,
+    ):
+        remove_path(path)
 
 
 def frontend_dir(variant: str) -> Path:
     path = FRONTEND_ROOT / variant
+
     if variant not in FRONTEND_VARIANTS:
         raise ValueError(f"未知前端版本：{variant}，可选：{', '.join(sorted(FRONTEND_VARIANTS))}")
+
     if not (path / "index.html").exists():
         raise FileNotFoundError(f"未找到前端入口：{path / 'index.html'}")
+
     return path
 
 
@@ -50,9 +68,11 @@ def find_conda_binaries() -> list[tuple[str, str]]:
         python_dir / "Library" / "bin",
         python_dir.parent / "Library" / "bin",
     ]
+
     for dll_dir in candidates:
         if dll_dir.is_dir():
             return [(str(dll_dir), ".")]
+
     return []
 
 
@@ -70,6 +90,7 @@ def write_spec(variant: str) -> Path:
     spec_path = ROOT_DIR / SPEC_NAME
     runtime_hook = write_runtime_hook(variant)
     conda_binaries = find_conda_binaries()
+
     spec_content = f'''# -*- mode: python ; coding: utf-8 -*-
 
 APP_NAME_FROM_SCRIPT = {APP_NAME!r}
@@ -122,6 +143,7 @@ exe = EXE(
     icon=['logo.ico'],
 )
 '''
+
     spec_path.write_text(spec_content, encoding="utf-8")
     return spec_path
 
@@ -133,11 +155,17 @@ def install_requirements() -> None:
 
 def build_executable(variant: str) -> None:
     spec_path = write_spec(variant)
-    run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", str(spec_path)])
+
+    try:
+        run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", str(spec_path)])
+    finally:
+        remove_generated_build_files()
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build Fanqie Publish Sync as a Windows windowed executable.")
+    parser = argparse.ArgumentParser(
+        description="Build Fanqie Publish Sync as a Windows windowed executable."
+    )
     parser.add_argument(
         "--skip-install",
         action="store_true",
@@ -149,6 +177,7 @@ def main() -> None:
         default=DEFAULT_BUILD_FRONTEND_VARIANT,
         help=f"Choose which frontend variant to package. Default: {DEFAULT_BUILD_FRONTEND_VARIANT}.",
     )
+
     args = parser.parse_args()
 
     print("Using Python:", sys.executable)
@@ -164,6 +193,7 @@ def main() -> None:
     build_executable(args.frontend)
 
     output = ROOT_DIR / "dist" / f"{APP_NAME}.exe"
+
     print()
     print("Build finished.")
     print("Executable:", output)
