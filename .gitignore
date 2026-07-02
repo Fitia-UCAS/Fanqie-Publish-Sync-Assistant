@@ -6,6 +6,8 @@ __pycache__/
 
 build/
 dist/
+
+_pyinstaller_frontend_variant.py
 *.spec
 
 # Local runtime state, secrets, browser sessions, logs and generated artifacts.
