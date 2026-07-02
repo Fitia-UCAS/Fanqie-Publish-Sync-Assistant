@@ -6,11 +6,12 @@ import subprocess
 import sys
 from pathlib import Path
 
-APP_NAME = "番茄发布同步助手"
+APP_NAME = "番茄发布与同步助手"
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SPEC_NAME = "fanqie-publish-sync.spec"
 FRONTEND_ROOT = ROOT_DIR / "frontend"
 FRONTEND_VARIANTS = {"release", "personal"}
+DEFAULT_BUILD_FRONTEND_VARIANT = "release"
 RUNTIME_HOOK = ROOT_DIR / "tools" / "_pyinstaller_frontend_variant.py"
 
 
@@ -145,8 +146,8 @@ def main() -> None:
     parser.add_argument(
         "--frontend",
         choices=sorted(FRONTEND_VARIANTS),
-        default="release",
-        help="Choose which frontend variant to package. Default: release.",
+        default=DEFAULT_BUILD_FRONTEND_VARIANT,
+        help=f"Choose which frontend variant to package. Default: {DEFAULT_BUILD_FRONTEND_VARIANT}.",
     )
     args = parser.parse_args()
 

@@ -92,12 +92,20 @@ def test_release_frontend_only_contains_publish_and_sync_pages() -> None:
         assert title not in html
 
 
-def test_main_defaults_to_release_frontend_but_can_select_personal() -> None:
+def test_main_defaults_to_personal_frontend_but_can_select_release() -> None:
     import main
 
-    assert main.DEFAULT_FRONTEND_VARIANT == "release"
-    assert main.frontend_index_path(ROOT_DIR, "release") == RELEASE_FRONTEND_DIR / "index.html"
+    assert main.DEFAULT_FRONTEND_VARIANT == "personal"
     assert main.frontend_index_path(ROOT_DIR, "personal") == PERSONAL_FRONTEND_DIR / "index.html"
+    assert main.frontend_index_path(ROOT_DIR, "release") == RELEASE_FRONTEND_DIR / "index.html"
+
+
+def test_build_exe_defaults_to_release_frontend() -> None:
+    from tools import build_exe
+
+    assert build_exe.DEFAULT_BUILD_FRONTEND_VARIANT == "release"
+    assert build_exe.frontend_dir("release") == RELEASE_FRONTEND_DIR
+    assert build_exe.frontend_dir("personal") == PERSONAL_FRONTEND_DIR
 
 
 def _input_tag(html: str, field_id: str) -> str:

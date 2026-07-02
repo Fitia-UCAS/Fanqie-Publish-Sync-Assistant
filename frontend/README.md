@@ -5,15 +5,16 @@
 - `personal/`：个人版，保留番茄发布、番茄同步、小说处理、网页抓取、角色素材、当前剧情。
 - `release/`：发布版，只保留番茄发布、番茄同步。
 
-默认启动和打包都使用发布版：
+默认本地启动使用个人版，编译打包默认使用发布版：
 
 ```bash
 python main.py
-python tools/build_exe.py --frontend release
+python tools/build_exe.py
 ```
 
-需要本地打开个人版时，可以设置环境变量：
+需要临时指定前端版本时，可以设置环境变量或传入编译参数：
 
 ```bash
-FANQIE_FRONTEND_VARIANT=personal python main.py
+FANQIE_FRONTEND_VARIANT=release python main.py
+python tools/build_exe.py --frontend personal
 ```
