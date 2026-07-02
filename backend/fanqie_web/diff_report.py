@@ -1,10 +1,10 @@
 from __future__ import annotations
 import difflib
 import shutil
-import subprocess
 import time
 from pathlib import Path
 from backend.paths import SYNCING_COMPARE_DIR
+from backend.subprocesses import run as run_subprocess
 from backend.novel.text_cleaning import normalize_text, normalize_novel_body
 def chapter_dir(chapter_no: int) -> Path:
     path = SYNCING_COMPARE_DIR / f"chapter_{chapter_no:03d}"
@@ -58,7 +58,7 @@ def make_git_diff(
             str(old_path),
             str(new_path),
         ]
-        result = subprocess.run(
+        result = run_subprocess(
             cmd,
             cwd=str(SYNCING_COMPARE_DIR),
             capture_output=True,

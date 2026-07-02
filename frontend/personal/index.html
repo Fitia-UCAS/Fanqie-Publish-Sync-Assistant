@@ -10,7 +10,7 @@
     <div class="pixel-shell">
       <aside class="pixel-sidebar">
         <div class="brand-panel">
-          <img class="brand-logo" src="../logo.png" alt="" onerror="this.classList.add('hidden-logo')" />
+          <img class="brand-logo" src="../../logo.png" alt="" onerror="this.classList.add('hidden-logo')" />
           <div>
             <strong>番茄发布与同步助手</strong>
           </div>
@@ -19,16 +19,16 @@
         <nav class="pixel-nav" aria-label="功能导航">
           <button class="active" data-view="publish"><span class="nav-icon">↑</span>番茄发布</button>
           <button data-view="sync"><span class="nav-icon">↓</span>番茄同步</button>
-          <button data-view="process" data-personal><span class="nav-icon">▤</span>小说处理</button>
-          <button data-view="crawler" data-personal><span class="nav-icon">⌁</span>网页抓取</button>
-          <button data-view="character_notes" data-personal><span class="nav-icon">◆</span>角色素材</button>
-          <button data-view="plot_notes" data-personal><span class="nav-icon">◇</span>当前剧情</button>
+          <button data-view="process"><span class="nav-icon">▤</span>小说处理</button>
+          <button data-view="crawler"><span class="nav-icon">⌁</span>网页抓取</button>
+          <button data-view="character_notes"><span class="nav-icon">◆</span>角色素材</button>
+          <button data-view="plot_notes"><span class="nav-icon">◇</span>当前剧情</button>
         </nav>
 
         <section class="sidebar-card auth-card" aria-label="登录状态">
           <div class="auth-file-row">
-            <input id="apAuthStatePath" placeholder="默认 state.json" />
-            <button class="pixel-btn tiny" data-choose="auth" data-target="apAuthStatePath" data-config="auto_publish.authStatePath">选择</button>
+            <input id="authStatePath" placeholder="默认 state.json" />
+            <button class="pixel-btn tiny" data-choose="auth" data-target="authStatePath" data-config="auto_publish.authStatePath">选择</button>
           </div>
           <div class="auth-actions">
             <button class="pixel-btn tiny" data-run="do_login">登录</button>
@@ -120,7 +120,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="process" data-personal>
+        <section class="view-panel" data-panel="process">
           <article class="pixel-card form-card process-stack">
             <section class="tool-block">
               <div class="form-grid">
@@ -223,7 +223,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="crawler" data-personal>
+        <section class="view-panel" data-panel="crawler">
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说目录链接 <input id="nsUrl" type="password" autocomplete="off" placeholder="支持站点小说目录页 URL" /></label>
@@ -249,7 +249,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="character_notes" data-personal>
+        <section class="view-panel" data-panel="character_notes">
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说 TXT
@@ -281,7 +281,7 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="plot_notes" data-personal>
+        <section class="view-panel" data-panel="plot_notes">
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说

@@ -13,10 +13,12 @@ EXCLUDED_PARTS = {
     ".mypy_cache",
     ".ruff_cache",
     ".git",
+    "build",
+    "dist",
     "browser_edge_profile",
 }
-EXCLUDED_SUFFIXES = {".pyc", ".pyo", ".orig", ".log", ".bat"}
-EXCLUDED_NAME_PREFIXES = ("PATCH_NOTES_",)
+EXCLUDED_SUFFIXES = {".pyc", ".pyo", ".orig", ".log", ".bat", ".spec"}
+EXCLUDED_NAME_PREFIXES = ("PATCH_NOTES_", "_pyinstaller_")
 RUNTIME_DATA_ROOTS = {"auth", "runtime", "runs", "secrets", "settings", "workspaces"}
 RUNTIME_RELATIVE_PATHS = {
     "data/auth/fanqie/default/state.json",

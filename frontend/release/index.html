@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>番茄发布与同步助手</title>
+<link href="assets/app.css" rel="stylesheet"/>
+</head>
+<body data-current-view="publish" data-style="pixel">
+<div class="pixel-shell">
+<aside class="pixel-sidebar">
+<div class="brand-panel">
+<img alt="" class="brand-logo" onerror="this.classList.add('hidden-logo')" src="../../logo.png"/>
+<div>
+<strong>番茄发布与同步助手</strong>
+</div>
+</div>
+<nav aria-label="功能导航" class="pixel-nav">
+<button class="active" data-view="publish"><span class="nav-icon">↑</span>番茄发布</button>
+<button data-view="sync"><span class="nav-icon">↓</span>番茄同步</button>
+
+
+
+
+</nav>
+<section aria-label="登录状态" class="sidebar-card auth-card">
+<div class="auth-file-row">
+<input id="authStatePath" placeholder="默认 state.json"/>
+<button class="pixel-btn tiny" data-choose="auth" data-config="auto_publish.authStatePath" data-target="authStatePath">选择</button>
+</div>
+<div class="auth-actions">
+<button class="pixel-btn tiny" data-run="do_login">登录</button>
+<button class="pixel-btn tiny" data-run="check_login_state">检测</button>
+<button class="pixel-btn tiny" data-run="reset_login">重置</button>
+</div>
+</section>
+<section aria-label="主题切换" class="sidebar-card theme-card">
+<div class="theme-switch">
+<button class="active" data-theme-style="pixel">像素原版</button>
+<button data-theme-style="night">夜间像素</button>
+</div>
+</section>
+</aside>
+<main class="pixel-main">
+<section class="view-panel" data-panel="publish">
+<article class="pixel-card form-card">
+<div class="form-grid">
+<label class="field full">小说来源
+                <div class="file-row"><input id="apNovelFile" placeholder="选择或粘贴本地 TXT 路径"/><button class="pixel-btn" data-choose="source" data-config="auto_publish.novelFile" data-target="apNovelFile">选择</button></div>
+</label>
+<label class="field full">章节管理 URL <input autocomplete="off" id="apUrl" placeholder="https://fanqienovel.com/ 或章节管理页面 URL" type="password"/></label>
+<label class="field">起始章节 <input id="apStart" min="1" type="number" value="1"/></label>
+<label class="field">结束章节 <input id="apEnd" min="1" type="number" value="1"/></label>
+</div>
+<div class="option-grid">
+<label><input id="apUseAi" type="checkbox"/> 使用 AI</label>
+<label><input checked="" id="apVerifyAfterPublish" type="checkbox"/> 列表校验</label>
+<label><input id="apHeadless" type="checkbox"/> 后台无头</label>
+<label><input checked="" id="apDebugScreenshots" type="checkbox"/> 步骤截图</label>
+<label><input checked="" id="apFailureScreenshots" type="checkbox"/> 失败截图</label>
+<label><input checked="" id="apGitTracking" type="checkbox"/> Git 追踪</label>
+<label><input checked="" id="apCleanBeforeRun" type="checkbox"/> 启动清理</label>
+<label><input id="apManualSchedule" type="checkbox"/> 手动定时</label>
+</div>
+<div class="schedule-box hidden" id="apManualScheduleFields">
+<label>起始日期 <input id="apScheduleStartDate" type="date"/></label>
+<label>上午时间 <input id="apScheduleMorningTime" type="time" value="10:00"/></label>
+<label>上午章数 <input id="apScheduleMorningCount" min="0" type="number" value="1"/></label>
+<label>下午时间 <input id="apScheduleAfternoonTime" type="time" value="18:00"/></label>
+<label>下午章数 <input id="apScheduleAfternoonCount" min="0" type="number" value="0"/></label>
+</div>
+<div class="action-grid">
+<button class="pixel-btn primary" data-operation="publish" data-run="auto_publish">启动发布</button>
+<button class="pixel-btn" data-run="auto_publish_stop">停止发布</button>
+<button class="pixel-btn" data-run="auto_publish_pause">暂停</button>
+<button class="pixel-btn" data-run="auto_publish_resume">继续</button>
+</div>
+</article>
+</section>
+<section class="view-panel" data-panel="sync">
+<article class="pixel-card form-card">
+<div class="form-grid">
+<label class="field full">小说来源
+                <div class="file-row"><input id="syNovelFile" placeholder="选择或粘贴本地 TXT 路径"/><button class="pixel-btn" data-choose="source" data-config="chapter_sync.novelFile" data-target="syNovelFile">选择</button></div>
+</label>
+<label class="field full">章节管理 URL <input autocomplete="off" id="syUrl" placeholder="https://fanqienovel.com/ 或章节管理页面 URL" type="password"/></label>
+<label class="field">起始章节 <input id="syStart" min="1" type="number" value="1"/></label>
+<label class="field">结束章节 <input id="syEnd" min="1" type="number" value="1"/></label>
+</div>
+<div class="option-grid">
+<label><input id="syUseAi" type="checkbox"/> 使用 AI</label>
+<label><input checked="" id="syVerifyAfterPublish" type="checkbox"/> 列表校验</label>
+<label><input id="syHeadless" type="checkbox"/> 后台无头</label>
+<label><input checked="" id="syDebugScreenshots" type="checkbox"/> 步骤截图</label>
+<label><input checked="" id="syFailureScreenshots" type="checkbox"/> 失败截图</label>
+<label><input checked="" id="syGitTracking" type="checkbox"/> Git 追踪</label>
+<label><input checked="" id="syCleanBeforeRun" type="checkbox"/> 启动清理</label>
+<label><input id="syManualSchedule" type="checkbox"/> 手动定时</label>
+</div>
+<div class="schedule-box hidden" id="syManualScheduleFields">
+<label>起始日期 <input id="syScheduleStartDate" type="date"/></label>
+<label>上午时间 <input id="syScheduleMorningTime" type="time" value="10:00"/></label>
+<label>上午章数 <input id="syScheduleMorningCount" min="0" type="number" value="1"/></label>
+<label>下午时间 <input id="syScheduleAfternoonTime" type="time" value="18:00"/></label>
+<label>下午章数 <input id="syScheduleAfternoonCount" min="0" type="number" value="0"/></label>
+</div>
+<div class="action-grid">
+<button class="pixel-btn primary" data-operation="push" data-run="chapter_sync">开始同步</button>
+<button class="pixel-btn" data-operation="pull" data-run="chapter_sync">拉取远端</button>
+<button class="pixel-btn" data-operation="compare" data-run="chapter_sync">打开对比</button>
+<button class="pixel-btn" data-run="chapter_sync_stop">停止同步</button>
+<button class="pixel-btn" data-run="chapter_sync_pause">暂停</button>
+<button class="pixel-btn" data-run="chapter_sync_resume">继续</button>
+</div>
+</article>
+</section>
+
+
+
+
+<article class="console-card">
+<div class="console-shell">
+<div class="console-tools">
+<button id="copyConsole" type="button">复制</button>
+<button id="clearConsole" type="button">清空</button>
+</div>
+<pre id="consoleOutput"></pre>
+</div>
+</article>
+</main>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>

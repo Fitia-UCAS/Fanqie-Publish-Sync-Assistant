@@ -9,6 +9,7 @@ from typing import Callable
 from backend.publishing.local_source import Chapter
 from backend.novel.text_cleaning import normalize_novel_body
 from backend.paths import PUBLISHING_DEBUG_DIR, PUBLISHING_TRACKER_DIR
+from backend.subprocesses import run as run_subprocess
 
 
 def clean_previous_publish_artifacts(*, log: Callable[[str], None]) -> None:
@@ -67,7 +68,7 @@ def _commit_publish_snapshot(repo: Path, chapter_no: int) -> str:
         return ""
     repo.mkdir(parents=True, exist_ok=True)
     if not (repo / ".git").exists():
-        subprocess.run(["git", "init"], cwd=str(repo), capture_output=True, text=True, encoding="utf-8", errors="replace")
+        run_subprocess(["git", "init"], cwd=str(repo), capture_output=True, text=True, encoding="utf-8", errors="replace")
         _run_git(repo, ["config", "user.name", "fanqie_assistant"])
         _run_git(repo, ["config", "user.email", "fanqie_assistant@local"])
         _run_git(repo, ["config", "core.quotepath", "false"])
@@ -82,7 +83,7 @@ def _commit_publish_snapshot(repo: Path, chapter_no: int) -> str:
 
 
 def _run_git(repo: Path, args: list[str]) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", *args], cwd=str(repo), capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return run_subprocess(["git", *args], cwd=str(repo), capture_output=True, text=True, encoding="utf-8", errors="replace")
 
 
 def _latest_commit(repo: Path) -> str:

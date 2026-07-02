@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from backend.log_setup import get_logger
+from backend.subprocesses import run as run_subprocess
 from backend.paths import (
     SYSTEM_DIR,
     BROWSER_DATA_DIR,
@@ -198,14 +199,14 @@ def _clear_windows_attributes(path: Path) -> None:
     if os.name != "nt":
         return
     try:
-        subprocess.run(
+        run_subprocess(
             ["attrib", "-R", "-S", "-H", str(path / "*"), "/S", "/D"],
             check=False,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             shell=False,
         )
-        subprocess.run(
+        run_subprocess(
             ["attrib", "-R", "-S", "-H", str(path)],
             check=False,
             stdout=subprocess.DEVNULL,
@@ -227,7 +228,7 @@ def _grant_current_user_full_control(path: Path) -> None:
         return
 
     try:
-        subprocess.run(
+        run_subprocess(
             ["icacls", str(path), "/grant", f"{account}:(OI)(CI)F", "/T", "/C", "/Q"],
             check=False,
             stdout=subprocess.DEVNULL,

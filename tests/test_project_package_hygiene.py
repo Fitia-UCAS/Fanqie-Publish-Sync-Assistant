@@ -6,8 +6,9 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 
 
 def test_no_empty_frontend_placeholder_components() -> None:
-    components_dir = ROOT_DIR / "frontend" / "assets" / "components"
-    assert not components_dir.exists()
+    for variant in ("personal", "release"):
+        components_dir = ROOT_DIR / "frontend" / variant / "assets" / "components"
+        assert not components_dir.exists()
 
 
 def test_text_file_helpers_are_flat_and_named_directly() -> None:

@@ -1,7 +1,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const PATH_FIELDS = new Set([
-    'apNovelFile', 'apAuthStatePath', 'syNovelFile',
+    'apNovelFile', 'authStatePath', 'syNovelFile',
     'exNovelFile', 'exOutputFile', 'exBatchFolder', 'spInputFile', 'spOutputDir',
     'tcAdInput', 'tcAdFolder', 'tcMoveInput', 'tcMoveFolder', 'nsOutput',
     'cmSource', 'cmOutputDir', 'cpSource', 'cpPlotNotesFile', 'cpOutputDir', 'cpOutputFile'
@@ -69,10 +69,7 @@
     localStorage.setItem('fanqieUiTheme', style);
     document.querySelectorAll('[data-theme-style]').forEach((button) => button.classList.toggle('active', button.dataset.themeStyle === style));
   };
-  const isPersonalView = (view) => ['process', 'crawler', 'character_notes', 'plot_notes'].includes(view);
   const setView = (view) => {
-    const showPersonal = state.config?.showPersonalPages !== false;
-    if (!showPersonal && isPersonalView(view)) return;
     document.body.dataset.currentView = view;
     document.querySelectorAll('[data-view]').forEach((button) => button.classList.toggle('active', button.dataset.view === view));
     saveConfig({ activePage: ({ publish: 'auto_publish', sync: 'chapter_sync', process: 'process_novel', crawler: 'web_crawler' }[view] || view) }).catch(() => {});
@@ -95,19 +92,9 @@
     select.innerHTML = Object.entries(items).map(([key, label]) => `<option value="${key}">${label}</option>`).join('');
     if (current) select.value = current;
   };
-  const togglePersonalElements = (show) => {
-    document.querySelectorAll('[data-personal]').forEach((el) => {
-      el.classList.toggle('hidden', !show);
-    });
-    if (!show) {
-      const view = document.body.dataset.currentView;
-      if (isPersonalView(view)) setView('publish');
-    }
-  };
   const fillFromState = (nextState) => {
     state = nextState || { config: {} };
     const config = state.config || {};
-    togglePersonalElements(config.showPersonalPages !== false);
     const ap = config.auto_publish || {};
     const sy = config.chapter_sync || {};
     const pn = config.process_novel || {};
@@ -117,7 +104,8 @@
     const cm = config.character_notes || {};
     const cp = config.plot_notes || {};
 
-    setVal('apNovelFile', ap.novelFile || ''); setVal('apUrl', ap.chapterManageUrl || ''); setVal('apAuthStatePath', ap.authStatePath || '');
+    setVal('authStatePath', ap.authStatePath || sy.authStatePath || '');
+    setVal('apNovelFile', ap.novelFile || ''); setVal('apUrl', ap.chapterManageUrl || '');
     setVal('apStart', ap.start || 1); setVal('apEnd', ap.end || 1);
     setChecked('apUseAi', ap.useAi); setChecked('apVerifyAfterPublish', ap.verifyAfterPublish !== false); setChecked('apHeadless', ap.headless);
     setChecked('apDebugScreenshots', ap.debugScreenshots !== false); setChecked('apFailureScreenshots', ap.failureScreenshots !== false); setChecked('apGitTracking', ap.gitTracking !== false);
@@ -126,7 +114,7 @@
     setVal('apScheduleAfternoonTime', ap.scheduleAfternoonTime || '18:00'); setVal('apScheduleAfternoonCount', ap.scheduleAfternoonCount ?? 0);
     syncScheduleBox('ap');
 
-    setVal('syNovelFile', sy.novelFile || ''); setVal('syUrl', sy.chapterManageUrl || ''); setVal('syAuthStatePath', sy.authStatePath || '');
+    setVal('syNovelFile', sy.novelFile || ''); setVal('syUrl', sy.chapterManageUrl || '');
     setVal('syStart', sy.start || 1); setVal('syEnd', sy.end || 1);
     setChecked('syUseAi', sy.useAi); setChecked('syVerifyAfterPublish', sy.verifyAfterPublish !== false); setChecked('syHeadless', sy.headless);
     setChecked('syDebugScreenshots', sy.debugScreenshots !== false); setChecked('syFailureScreenshots', sy.failureScreenshots !== false); setChecked('syGitTracking', sy.gitTracking !== false);
@@ -188,7 +176,7 @@
   const syncScheduleBox = (prefix = 'ap') => $(`${prefix}ManualScheduleFields`)?.classList.toggle('hidden', !checked(`${prefix}ManualSchedule`));
 
   const collectPublishPayload = (prefix, operation) => ({
-    novelFile: val(`${prefix}NovelFile`), chapterManageUrl: val(`${prefix}Url`), authStatePath: val(`${prefix}AuthStatePath`),
+    novelFile: val(`${prefix}NovelFile`), chapterManageUrl: val(`${prefix}Url`), authStatePath: val('authStatePath'),
     start: num(`${prefix}Start`, 1), end: num(`${prefix}End`, 1), useAi: checked(`${prefix}UseAi`), verifyAfterPublish: checked(`${prefix}VerifyAfterPublish`),
     debugScreenshots: checked(`${prefix}DebugScreenshots`), failureScreenshots: checked(`${prefix}FailureScreenshots`), gitTracking: checked(`${prefix}GitTracking`),
     cleanBeforeRun: checked(`${prefix}CleanBeforeRun`), headless: checked(`${prefix}Headless`), manualSchedule: checked(`${prefix}ManualSchedule`),
@@ -241,6 +229,10 @@
   });
   $('apManualSchedule')?.addEventListener('change', () => syncScheduleBox('ap'));
   $('syManualSchedule')?.addEventListener('change', () => syncScheduleBox('sy'));
+  $('authStatePath')?.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveConfig({ auto_publish: { authStatePath: val('authStatePath') }, chapter_sync: { authStatePath: val('authStatePath') } }).catch(() => {}), SCHEDULE_DEBOUNCE);
+  });
   PATH_FIELDS.forEach((id) => {
     const node = $(id);
     node?.addEventListener('input', () => { delete node.dataset.fullValue; node.removeAttribute('title'); });
@@ -257,7 +249,12 @@
       else if (kind === 'save') path = await callApi('choose_file', config, true, 'output.txt');
       else if (kind === 'auth') path = await (api()?.choose_login_state ? callApi('choose_login_state', config) : callApi('choose_file', config, false, 'state.json'));
       else path = await callApi('choose_file', config, false, 'novel.txt');
-      if (path && target) setVal(target, path);
+      if (path && target) {
+        setVal(target, path);
+        if (target === 'authStatePath') {
+          await saveConfig({ auto_publish: { authStatePath: path }, chapter_sync: { authStatePath: path } });
+        }
+      }
     } catch (error) { log(error.message, 'error'); }
   }));
 
@@ -323,12 +320,6 @@
   let saveTimer = null;
   const SCHEDULE_DEBOUNCE = 600;
   const FORM_SECTIONS = { ap: 'auto_publish', sy: 'chapter_sync' };
-  const scheduleSave = (prefix) => {
-    setTimeout(() => {
-      const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || 'publish');
-      saveConfig({ [FORM_SECTIONS[prefix]]: payload }).catch(() => {});
-    }, SCHEDULE_DEBOUNCE);
-  };
   document.querySelectorAll('[data-panel="publish"] input, [data-panel="publish"] select, [data-panel="sync"] input, [data-panel="sync"] select').forEach((el) => {
     const id = el.id;
     const prefix = id && id.match(/^(ap|sy)/)?.[1];
@@ -337,14 +328,14 @@
     el.addEventListener('input', () => {
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => {
-        const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || 'publish');
+        const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || (prefix === 'sy' ? 'push' : 'publish'));
         saveConfig({ [section]: payload }).catch(() => {});
       }, SCHEDULE_DEBOUNCE);
     });
     el.addEventListener('change', () => {
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => {
-        const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || 'publish');
+        const payload = collectPublishPayload(prefix, $(`${prefix}Operation`)?.value || (prefix === 'sy' ? 'push' : 'publish'));
         saveConfig({ [section]: payload }).catch(() => {});
       }, SCHEDULE_DEBOUNCE);
     });

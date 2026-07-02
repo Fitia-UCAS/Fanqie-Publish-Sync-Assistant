@@ -12,7 +12,7 @@ from backend.novel.source import parse_chapter_source
 from backend.novel.chapters import Chapter as PreviewChapter
 from backend.actions.clean import clean_text
 from backend.actions.crawl import crawl_chapters, preview_crawl_output
-from backend.actions.login import start_login
+from backend.fanqie_web.login import start_login
 from backend.actions.process import analyze_novel_file, process_novel
 from backend.actions.split import preview_novel_split_output, split_novel
 from backend.actions.publish import publish_chapters

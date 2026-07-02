@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 
 from backend.paths import SYNCING_HISTORY_DIR
+from backend.subprocesses import run as run_subprocess
 from backend.novel.text_cleaning import normalize_novel_body
 
 
@@ -13,7 +14,7 @@ def git_available() -> bool:
 
 
 def run_git(repo: Path, args: list[str]) -> subprocess.CompletedProcess:
-    return subprocess.run(
+    return run_subprocess(
         ["git", *args],
         cwd=str(repo),
         capture_output=True,
@@ -28,7 +29,7 @@ def ensure_repo(repo: Path) -> bool:
         return False
     repo.mkdir(parents=True, exist_ok=True)
     if not (repo / ".git").exists():
-        subprocess.run(["git", "init"], cwd=str(repo), capture_output=True, text=True, encoding="utf-8", errors="replace")
+        run_subprocess(["git", "init"], cwd=str(repo), capture_output=True, text=True, encoding="utf-8", errors="replace")
         run_git(repo, ["config", "user.name", "novel_sync"])
         run_git(repo, ["config", "user.email", "novel_sync@local"])
         run_git(repo, ["config", "core.quotepath", "false"])

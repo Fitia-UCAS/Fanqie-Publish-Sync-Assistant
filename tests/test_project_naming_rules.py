@@ -77,6 +77,7 @@ class NamingRulesTest(unittest.TestCase):
             "paths.py",
             "runs.py",
             "settings.py",
+            "subprocesses.py",
             "text_files.py",
             "workspaces.py",
         }
@@ -115,6 +116,7 @@ class NamingRulesTest(unittest.TestCase):
                 "diff_report.py",
                 "list_counts.py",
                 "draft_save.py",
+                "login.py",
                 "edit_dialogs.py",
                 "remote_editor.py",
                 "form_fields.py",

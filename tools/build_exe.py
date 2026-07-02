@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 import argparse
-import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-
 APP_NAME = "番茄发布同步助手"
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SPEC_NAME = "fanqie-publish-sync.spec"
-FRONTEND_DIR = ROOT_DIR / "frontend"
-FRONTEND_BUILD_DIR = ROOT_DIR / "frontend_build"
-PERSONAL_VIEWS = {"process", "crawler", "character_notes", "plot_notes"}
+FRONTEND_ROOT = ROOT_DIR / "frontend"
+FRONTEND_VARIANTS = {"release", "personal"}
+RUNTIME_HOOK = ROOT_DIR / "tools" / "_pyinstaller_frontend_variant.py"
 
 
 def run(command: list[str]) -> None:
@@ -28,106 +26,21 @@ def remove_build_outputs() -> None:
         ROOT_DIR / "dist",
         ROOT_DIR / SPEC_NAME,
         ROOT_DIR / f"{APP_NAME}.spec",
+        RUNTIME_HOOK,
     ):
         if path.is_dir():
             shutil.rmtree(path)
         elif path.exists():
             path.unlink()
-    if FRONTEND_BUILD_DIR.is_dir():
-        shutil.rmtree(FRONTEND_BUILD_DIR)
 
 
-def strip_personal_from_html(text: str) -> str:
-    lines = text.split("\n")
-    out = []
-    skip_depth = 0
-    for line in lines:
-        if skip_depth == 0:
-            is_personal_section = (
-                "<section" in line
-                and any(f'data-panel="{v}"' in line for v in PERSONAL_VIEWS)
-            )
-            is_personal_button = (
-                "<button" in line
-                and any(f'data-view="{v}"' in line for v in PERSONAL_VIEWS)
-            )
-            if is_personal_section:
-                skip_depth = 1
-                skip_depth += line.count("<section") - line.count("</section>")
-                continue
-            if is_personal_button:
-                continue
-            out.append(line)
-        else:
-            skip_depth += line.count("<section") - line.count("</section>")
-            if skip_depth <= 0:
-                skip_depth = 0
-    return "\n".join(out)
-
-
-def strip_personal_from_css(text: str) -> str:
-    result = text
-    for view in PERSONAL_VIEWS:
-        result = re.sub(
-            r',?\s*body\[data-current-view="' + view + r'"\]\s*\.view-panel\[data-panel="' + view + r'"\]',
-            "",
-            result,
-        )
-    return result
-
-
-def strip_personal_from_js(text: str) -> str:
-    result = text
-
-    result = re.sub(r"const isPersonalView =.*?;", "", result)
-    result = re.sub(
-        r"const togglePersonalElements =.*?(?:\n.*?)*?\};", "", result, flags=re.DOTALL
-    )
-
-    result = re.sub(
-        r"process_novel.*?process_novel_batch.*?novel_splitter.*?clean_text_ads.*?clean_text_breaks.*?",
-        "",
-        result,
-    )
-    result = re.sub(
-        r"character_notes.*?plot_notes.*?",
-        "",
-        result,
-    )
-
-    result = re.sub(
-        r"'process': 'process_novel'.*?",
-        "",
-        result,
-    )
-
-    content_lines = result.split("\n")
-    filtered_lines = []
-    for line in content_lines:
-        stripped = line.strip()
-        if "personal" not in stripped.lower() and "togglePersonalElements" not in stripped:
-            filtered_lines.append(line)
-    return "\n".join(filtered_lines)
-
-
-def prepare_frontend(exclude_personal: bool) -> Path:
-    if not exclude_personal:
-        return FRONTEND_DIR
-    if FRONTEND_BUILD_DIR.exists():
-        shutil.rmtree(FRONTEND_BUILD_DIR)
-    shutil.copytree(FRONTEND_DIR, FRONTEND_BUILD_DIR)
-    for path in FRONTEND_BUILD_DIR.rglob("*.html"):
-        path.write_text(strip_personal_from_html(path.read_text(encoding="utf-8")), encoding="utf-8")
-    for path in FRONTEND_BUILD_DIR.rglob("*.css"):
-        path.write_text(strip_personal_from_css(path.read_text(encoding="utf-8")), encoding="utf-8")
-    for path in FRONTEND_BUILD_DIR.rglob("*.js"):
-        path.write_text(strip_personal_from_js(path.read_text(encoding="utf-8")), encoding="utf-8")
-    return FRONTEND_BUILD_DIR
-
-
-def cleanup_frontend_build() -> None:
-    if FRONTEND_BUILD_DIR.is_dir():
-        shutil.rmtree(FRONTEND_BUILD_DIR)
+def frontend_dir(variant: str) -> Path:
+    path = FRONTEND_ROOT / variant
+    if variant not in FRONTEND_VARIANTS:
+        raise ValueError(f"未知前端版本：{variant}，可选：{', '.join(sorted(FRONTEND_VARIANTS))}")
+    if not (path / "index.html").exists():
+        raise FileNotFoundError(f"未找到前端入口：{path / 'index.html'}")
+    return path
 
 
 def find_conda_binaries() -> list[tuple[str, str]]:
@@ -142,20 +55,31 @@ def find_conda_binaries() -> list[tuple[str, str]]:
     return []
 
 
-def write_spec(frontend_source: Path) -> Path:
-    spec_path = ROOT_DIR / SPEC_NAME
-    conda_binaries = find_conda_binaries()
-    extra_binaries = repr(conda_binaries) if conda_binaries else "[]"
-    spec_content = """# -*- mode: python ; coding: utf-8 -*-
+def write_runtime_hook(variant: str) -> Path:
+    RUNTIME_HOOK.write_text(
+        "import os\n"
+        f"os.environ.setdefault('FANQIE_FRONTEND_VARIANT', {variant!r})\n",
+        encoding="utf-8",
+    )
+    return RUNTIME_HOOK
 
-APP_NAME_FROM_SCRIPT = "__APP_NAME__"
+
+def write_spec(variant: str) -> Path:
+    source = frontend_dir(variant)
+    spec_path = ROOT_DIR / SPEC_NAME
+    runtime_hook = write_runtime_hook(variant)
+    conda_binaries = find_conda_binaries()
+    spec_content = f'''# -*- mode: python ; coding: utf-8 -*-
+
+APP_NAME_FROM_SCRIPT = {APP_NAME!r}
+
 
 a = Analysis(
     ['main.py'],
     pathex=['.'],
-    binaries=__CONDA_BINARIES__,
+    binaries={conda_binaries!r},
     datas=[
-        ('__FRONTEND__', 'frontend'),
+        ({str(source.as_posix())!r}, {'frontend/' + variant!r}),
         ('logo.png', '.'),
         ('logo.ico', '.'),
     ],
@@ -164,8 +88,8 @@ a = Analysis(
         'playwright._impl._driver',
     ],
     hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
+    hooksconfig={{}},
+    runtime_hooks=[{str(runtime_hook.as_posix())!r}],
     excludes=[
         'tkinter', 'test', 'unittest', 'pydoc', 'turtle', 'xmlrpc',
     ],
@@ -196,11 +120,7 @@ exe = EXE(
     entitlements_file=None,
     icon=['logo.ico'],
 )
-""".replace("__APP_NAME__", APP_NAME).replace(
-        "__FRONTEND__", str(frontend_source.as_posix())
-    ).replace(
-        "__CONDA_BINARIES__", extra_binaries
-    )
+'''
     spec_path.write_text(spec_content, encoding="utf-8")
     return spec_path
 
@@ -210,36 +130,37 @@ def install_requirements() -> None:
     run([sys.executable, "-m", "pip", "install", "-r", str(requirements)])
 
 
-def build_executable(frontend_source: Path) -> None:
-    spec_path = write_spec(frontend_source)
+def build_executable(variant: str) -> None:
+    spec_path = write_spec(variant)
     run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", str(spec_path)])
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build fanqie publish sync as a Windows executable.")
+    parser = argparse.ArgumentParser(description="Build Fanqie Publish Sync as a Windows windowed executable.")
     parser.add_argument(
         "--skip-install",
         action="store_true",
         help="Do not install Python dependencies before building.",
     )
     parser.add_argument(
-        "--exclude-personal",
-        action="store_true",
-        help="Exclude personal pages (process, crawler, character_notes, plot_notes) from the build.",
+        "--frontend",
+        choices=sorted(FRONTEND_VARIANTS),
+        default="release",
+        help="Choose which frontend variant to package. Default: release.",
     )
     args = parser.parse_args()
 
     print("Using Python:", sys.executable)
     print("Project root:", ROOT_DIR)
+    print("Frontend variant:", args.frontend)
 
     remove_build_outputs()
-    frontend_source = prepare_frontend(args.exclude_personal)
+    frontend_dir(args.frontend)
 
     if not args.skip_install:
         install_requirements()
 
-    build_executable(frontend_source)
-    cleanup_frontend_build()
+    build_executable(args.frontend)
 
     output = ROOT_DIR / "dist" / f"{APP_NAME}.exe"
     print()

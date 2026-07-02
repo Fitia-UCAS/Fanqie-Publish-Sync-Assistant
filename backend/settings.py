@@ -44,7 +44,6 @@ RECENT_INPUT_KEYS_BY_SECTION: dict[str, set[str]] = {
 
 DEFAULT_CONFIG: dict[str, Any] = {
     "activePage": "auto_publish",
-    "showPersonalPages": True,
     "process_novel": {
         "novelFile": "",
         "batchFolder": "",
@@ -241,7 +240,6 @@ def _load_split_config() -> dict[str, Any]:
 def _split_config_for_storage(config: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
     app_data: dict[str, Any] = {
         "activePage": config.get("activePage", DEFAULT_CONFIG["activePage"]),
-        "showPersonalPages": config.get("showPersonalPages", DEFAULT_CONFIG["showPersonalPages"]),
     }
     workflow_data: dict[str, Any] = {}
     recent_data: dict[str, Any] = {}
@@ -271,7 +269,7 @@ def _split_config_for_storage(config: dict[str, Any]) -> tuple[dict[str, Any], d
             secret_data[section] = secret_section
 
     for key, value in config.items():
-        if key not in {"activePage", *WORKFLOW_SECTIONS}:
+        if key not in {"activePage", "showPersonalPages", *WORKFLOW_SECTIONS}:
             app_data[key] = deepcopy(value)
 
     return app_data, workflow_data, recent_data, secret_data
