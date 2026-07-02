@@ -15,6 +15,9 @@ FRONTEND_VARIANTS = {"release", "personal"}
 DEFAULT_BUILD_FRONTEND_VARIANT = "release"
 
 RUNTIME_HOOK = ROOT_DIR / "tools" / "_pyinstaller_frontend_variant.py"
+DIST_DIR = ROOT_DIR / "dist"
+BUILD_DIR = ROOT_DIR / "build"
+OUTPUT_EXE = DIST_DIR / f"{APP_NAME}.exe"
 
 
 def run(command: list[str]) -> None:
@@ -30,18 +33,42 @@ def remove_path(path: Path) -> None:
         path.unlink()
 
 
+def remove_previous_executable() -> None:
+    """
+    删除上一次编译出来的 exe，但不删除 dist/data 这类运行配置数据。
+    """
+    if OUTPUT_EXE.exists():
+        print(f"Removing previous executable: {OUTPUT_EXE}")
+        remove_path(OUTPUT_EXE)
+
+    old_onedir_output = DIST_DIR / APP_NAME
+    if old_onedir_output.exists():
+        print(f"Removing previous onedir output: {old_onedir_output}")
+        remove_path(old_onedir_output)
+
+
 def remove_build_outputs() -> None:
+    """
+    编译前清理构建产物。
+
+    注意：
+    不直接删除整个 dist 目录，避免误删 dist/data 里的用户配置。
+    """
     for path in (
-        ROOT_DIR / "build",
-        ROOT_DIR / "dist",
+        BUILD_DIR,
         ROOT_DIR / SPEC_NAME,
         ROOT_DIR / f"{APP_NAME}.spec",
         RUNTIME_HOOK,
     ):
         remove_path(path)
 
+    remove_previous_executable()
+
 
 def remove_generated_build_files() -> None:
+    """
+    编译结束后清理临时生成文件。
+    """
     for path in (
         ROOT_DIR / SPEC_NAME,
         ROOT_DIR / f"{APP_NAME}.spec",
@@ -192,11 +219,9 @@ def main() -> None:
 
     build_executable(args.frontend)
 
-    output = ROOT_DIR / "dist" / f"{APP_NAME}.exe"
-
     print()
     print("Build finished.")
-    print("Executable:", output)
+    print("Executable:", OUTPUT_EXE)
 
 
 if __name__ == "__main__":
