@@ -170,8 +170,8 @@ body[data-current-view="publish"] .view-panel[data-panel="publish"],
 body[data-current-view="sync"] .view-panel[data-panel="sync"],
 body[data-current-view="process"] .view-panel[data-panel="process"],
 body[data-current-view="crawler"] .view-panel[data-panel="crawler"],
-body[data-current-view="character_material"] .view-panel[data-panel="character_material"],
-body[data-current-view="current_plot"] .view-panel[data-panel="current_plot"] { display: block; }
+body[data-current-view="character_notes"] .view-panel[data-panel="character_notes"],
+body[data-current-view="plot_notes"] .view-panel[data-panel="plot_notes"] { display: block; }
 
 .pixel-card {
   width: 100%;

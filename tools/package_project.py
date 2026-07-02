@@ -7,20 +7,43 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT.parent / "Fanqie-Publish-Sync-Assistant.zip"
-EXCLUDED_PARTS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".git", "browser_edge_profile"}
-EXCLUDED_SUFFIXES = {".pyc", ".pyo", ".orig"}
+EXCLUDED_PARTS = {
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".git",
+    "browser_edge_profile",
+}
+EXCLUDED_SUFFIXES = {".pyc", ".pyo", ".orig", ".log", ".bat"}
 EXCLUDED_NAME_PREFIXES = ("PATCH_NOTES_",)
-EXCLUDED_RUNTIME_RELATIVE_PATHS = {"data/fanqie_web/state.json"}
+RUNTIME_DATA_ROOTS = {"auth", "runtime", "runs", "secrets", "settings", "workspaces"}
+RUNTIME_RELATIVE_PATHS = {
+    "data/auth/fanqie/default/state.json",
+    "data/auth/fanqie/accounts.json",
+    "data/auth/fanqie/accounts",
+    "data/fanqie_web/chapter_sync_state.json",
+}
+RUNTIME_LEAF_DIRS = {"backups", "compare_reports", "debug", "history", "outputs", "tasklogs", "tracker", "chapters"}
 
 
 def should_include(path: Path) -> bool:
     relative = path.relative_to(ROOT)
     if any(part in EXCLUDED_PARTS for part in relative.parts):
         return False
-    if relative.as_posix() in EXCLUDED_RUNTIME_RELATIVE_PATHS:
+    if relative.parts and relative.parts[0] == "config":
         return False
-    if relative.parts[:2] == ("data", "fanqie_web") and path.suffix == ".json":
+    if relative.as_posix() in RUNTIME_RELATIVE_PATHS:
         return False
+    if relative.parts and relative.parts[0] == "data":
+        if relative.name == ".gitkeep" and len(relative.parts) == 2:
+            return True
+        if len(relative.parts) >= 2 and relative.parts[1] in RUNTIME_DATA_ROOTS:
+            return False
+        if any(part in RUNTIME_LEAF_DIRS for part in relative.parts[2:]):
+            return False
+        if path.suffix in {".json", ".log", ".png", ".jpg", ".jpeg", ".webp", ".txt", ".md"}:
+            return False
     if path.suffix in EXCLUDED_SUFFIXES:
         return False
     if path.name.startswith(EXCLUDED_NAME_PREFIXES):

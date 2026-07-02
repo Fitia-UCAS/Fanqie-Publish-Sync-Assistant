@@ -4,7 +4,7 @@
     'apNovelFile', 'apAuthStatePath', 'syNovelFile', 'syAuthStatePath',
     'exNovelFile', 'exOutputFile', 'exBatchFolder', 'spInputFile', 'spOutputDir',
     'tcAdInput', 'tcAdFolder', 'tcMoveInput', 'tcMoveFolder', 'nsOutput',
-    'cmSource', 'cmOutputDir', 'cpSource', 'cpCurrentPlotFile', 'cpOutputDir', 'cpOutputFile'
+    'cmSource', 'cmOutputDir', 'cpSource', 'cpPlotNotesFile', 'cpOutputDir', 'cpOutputFile'
   ]);
   const baseName = (value) => {
     const raw = String(value || '').trim();
@@ -41,7 +41,7 @@
   const pageNames = {
     auto_publish: '番茄发布', chapter_sync: '番茄同步', process_novel: '小说处理', process_novel_batch: '批量格式化',
     novel_splitter: '小说分割', clean_text_ads: '清理广告', clean_text_breaks: '修复句子', web_crawler: '网页抓取',
-    character_material: '角色素材', current_plot: '当前剧情', system: '系统'
+    character_notes: '角色素材', plot_notes: '当前剧情', system: '系统'
   };
   const api = () => window.pywebview && window.pywebview.api;
   const stamp = () => new Date().toLocaleTimeString();
@@ -101,8 +101,8 @@
     const split = config.novel_splitter || {};
     const clean = config.clean_text || {};
     const wc = config.web_crawler || {};
-    const cm = config.character_material || {};
-    const cp = config.current_plot || {};
+    const cm = config.character_notes || {};
+    const cp = config.plot_notes || {};
 
     setVal('apNovelFile', ap.novelFile || ''); setVal('apUrl', ap.chapterManageUrl || ''); setVal('apAuthStatePath', ap.authStatePath || '');
     setVal('apStart', ap.start || 1); setVal('apEnd', ap.end || 1);
@@ -138,17 +138,17 @@
     setVal('nsWorkers', wc.maxWorkers || 16); setVal('nsTimeout', wc.timeout || 25); setVal('nsDelayMin', wc.requestDelayMin ?? 0.12); setVal('nsDelayMax', wc.requestDelayMax ?? 0.35); setVal('nsRetries', wc.maxRetries ?? 3);
     setChecked('nsHtmlFallback', wc.htmlFallback !== false); setChecked('nsDetailedLog', wc.detailedLog);
 
-    optionList('cmPlatform', state.characterMaterialPlatforms, cm.platform || 'deepseek');
-    const cmDefaults = (state.characterMaterialDefaults || {})[cm.platform || 'deepseek'] || {};
+    optionList('cmPlatform', state.characterNotesPlatforms, cm.platform || 'deepseek');
+    const cmDefaults = (state.characterNotesDefaults || {})[cm.platform || 'deepseek'] || {};
     setVal('cmSource', cm.source || ''); setVal('cmOutputDir', cm.outputDir || ''); setVal('cmApiKey', cm.apiKey || '');
     setVal('cmBaseUrl', cm.baseUrl || cmDefaults.baseUrl || ''); setVal('cmModelName', cm.modelName || cmDefaults.modelName || ''); setVal('cmTemperature', cm.temperature ?? 0.2);
     setVal('cmCharacterTarget', cm.characterTarget || ''); setVal('cmKeyword', cm.keyword || ''); setVal('cmChapter', cm.chapter || '');
     setVal('cmStart', cm.start || ''); setVal('cmEnd', cm.end || ''); setVal('cmWorkers', cm.maxWorkers || 4);
     setChecked('cmAll', cm.allChapters !== false); setChecked('cmConcurrent', cm.concurrent !== false);
 
-    optionList('cpPlatform', state.currentPlotPlatforms || state.characterMaterialPlatforms, cp.platform || 'deepseek');
-    const cpDefaults = (state.currentPlotDefaults || state.characterMaterialDefaults || {})[cp.platform || 'deepseek'] || {};
-    setVal('cpSource', cp.source || ''); setVal('cpCurrentPlotFile', cp.currentPlotFile || ''); setVal('cpOutputDir', cp.outputDir || ''); setVal('cpOutputFile', cp.outputFile || '');
+    optionList('cpPlatform', state.plotNotesPlatforms || state.characterNotesPlatforms, cp.platform || 'deepseek');
+    const cpDefaults = (state.plotNotesDefaults || state.characterNotesDefaults || {})[cp.platform || 'deepseek'] || {};
+    setVal('cpSource', cp.source || ''); setVal('cpPlotNotesFile', cp.plotNotesFile || ''); setVal('cpOutputDir', cp.outputDir || ''); setVal('cpOutputFile', cp.outputFile || '');
     setVal('cpApiKey', cp.apiKey || ''); setVal('cpBaseUrl', cp.baseUrl || cpDefaults.baseUrl || ''); setVal('cpModelName', cp.modelName || cpDefaults.modelName || ''); setVal('cpTemperature', cp.temperature ?? 0.2);
     setVal('cpChapter', cp.chapter || ''); setVal('cpAroundChapter', cp.aroundChapter || ''); setVal('cpStart', cp.start || ''); setVal('cpEnd', cp.end || '');
     setVal('cpMode', cp.mode || 'extract_merge'); setVal('cpTargetWords', cp.targetWords || 260); setVal('cpRecentContext', cp.recentContextCount ?? 5); setVal('cpWorkers', cp.maxWorkers || 4);
@@ -200,7 +200,7 @@
     characterTarget: val('cmCharacterTarget'), keyword: val('cmKeyword'), chapter: num('cmChapter'), start: num('cmStart'), end: num('cmEnd'), maxWorkers: num('cmWorkers', 4), allChapters: checked('cmAll'), concurrent: checked('cmConcurrent')
   });
   const collectPlotPayload = (scope) => ({
-    source: val('cpSource'), currentPlotFile: val('cpCurrentPlotFile'), outputDir: val('cpOutputDir'), outputFile: val('cpOutputFile'), platform: val('cpPlatform') || 'deepseek', apiKey: val('cpApiKey'), baseUrl: val('cpBaseUrl'), modelName: val('cpModelName'), temperature: Number(val('cpTemperature') || 0.2),
+    source: val('cpSource'), plotNotesFile: val('cpPlotNotesFile'), outputDir: val('cpOutputDir'), outputFile: val('cpOutputFile'), platform: val('cpPlatform') || 'deepseek', apiKey: val('cpApiKey'), baseUrl: val('cpBaseUrl'), modelName: val('cpModelName'), temperature: Number(val('cpTemperature') || 0.2),
     scope, mode: val('cpMode') || 'extract_merge', chapter: num('cpChapter'), aroundChapter: num('cpAroundChapter'), start: num('cpStart'), end: num('cpEnd'), targetWords: num('cpTargetWords', 260), recentContextCount: num('cpRecentContext', 5), maxWorkers: num('cpWorkers', 4), replaceExisting: checked('cpReplaceExisting')
   });
 
@@ -248,7 +248,7 @@
         await saveConfig({ auto_publish: payload });
         log(await callApi('auto_publish_run', payload) ? '番茄发布任务已启动。' : '番茄发布任务未启动。', 'success');
       } else if (run === 'chapter_sync') {
-        const payload = collectPublishPayload('sy', button.dataset.operation || 'publish');
+        const payload = collectPublishPayload('sy', button.dataset.operation || 'push');
         await saveConfig({ chapter_sync: payload });
         log(await callApi('chapter_sync_run', payload) ? '番茄同步任务已启动。' : '番茄同步任务未启动。', 'success');
       } else if (run === 'novel_splitter') {
@@ -267,14 +267,14 @@
         const result = await callApi('web_crawler_preview', val('nsUrl'), val('nsOutput'));
         if (result.outputFile) setVal('nsOutput', result.outputFile);
         log(result.message || `预览完成：${result.title || '未知标题'}`, result.ok === false ? 'warn' : 'success');
-      } else if (run === 'character_material') {
+      } else if (run === 'character_notes') {
         const payload = collectCharacterPayload();
-        await saveConfig({ character_material: payload });
-        log(await callApi('character_material_run', payload) ? '角色素材抽取已启动。' : '角色素材抽取未启动。', 'success');
-      } else if (run === 'current_plot') {
+        await saveConfig({ character_notes: payload });
+        log(await callApi('character_notes_run', payload) ? '角色素材抽取已启动。' : '角色素材抽取未启动。', 'success');
+      } else if (run === 'plot_notes') {
         const payload = collectPlotPayload(button.dataset.scope || 'range');
-        await saveConfig({ current_plot: payload });
-        log(await callApi('current_plot_run', payload) ? '当前剧情总结已启动。' : '当前剧情总结未启动。', 'success');
+        await saveConfig({ plot_notes: payload });
+        log(await callApi('plot_notes_run', payload) ? '当前剧情总结已启动。' : '当前剧情总结未启动。', 'success');
       } else {
         const ok = await callApi(run);
         log(ok ? '操作已提交。' : '当前没有可处理任务。', ok ? 'success' : 'warn');

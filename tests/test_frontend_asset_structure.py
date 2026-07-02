@@ -60,7 +60,7 @@ def test_frontend_uses_theme_names_for_theme_switching() -> None:
 
 def test_frontend_contains_all_business_pages() -> None:
     html, _, _ = read_frontend()
-    for view in ["publish", "sync", "process", "crawler", "character_material", "current_plot"]:
+    for view in ["publish", "sync", "process", "crawler", "character_notes", "plot_notes"]:
         assert f'data-view="{view}"' in html
         assert f'data-panel="{view}"' in html
     for title in ["番茄发布", "番茄同步", "小说处理", "网页抓取", "角色素材", "当前剧情"]:

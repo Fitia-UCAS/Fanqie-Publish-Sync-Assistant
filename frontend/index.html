@@ -21,8 +21,8 @@
           <button data-view="sync"><span class="nav-icon">↓</span>番茄同步</button>
           <button data-view="process"><span class="nav-icon">▤</span>小说处理</button>
           <button data-view="crawler"><span class="nav-icon">⌁</span>网页抓取</button>
-          <button data-view="character_material"><span class="nav-icon">◆</span>角色素材</button>
-          <button data-view="current_plot"><span class="nav-icon">◇</span>当前剧情</button>
+          <button data-view="character_notes"><span class="nav-icon">◆</span>角色素材</button>
+          <button data-view="plot_notes"><span class="nav-icon">◇</span>当前剧情</button>
         </nav>
 
         <section class="sidebar-card theme-card" aria-label="主题切换">
@@ -104,7 +104,7 @@
               <label>下午章数 <input id="syScheduleAfternoonCount" type="number" min="0" value="0" /></label>
             </div>
             <div class="action-grid">
-              <button class="pixel-btn primary" data-run="chapter_sync" data-operation="publish">开始同步</button>
+              <button class="pixel-btn primary" data-run="chapter_sync" data-operation="push">开始同步</button>
               <button class="pixel-btn" data-run="chapter_sync" data-operation="pull">拉取远端</button>
               <button class="pixel-btn" data-run="chapter_sync" data-operation="compare">打开对比</button>
               <button class="pixel-btn" data-run="chapter_sync_stop">停止同步</button>
@@ -243,14 +243,14 @@
           </article>
         </section>
 
-        <section class="view-panel" data-panel="character_material">
+        <section class="view-panel" data-panel="character_notes">
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说 TXT
-                <div class="file-row"><input id="cmSource" placeholder="选择完整小说 TXT" /><button class="pixel-btn" data-choose="file" data-target="cmSource" data-config="character_material.source">选择</button></div>
+                <div class="file-row"><input id="cmSource" placeholder="选择完整小说 TXT" /><button class="pixel-btn" data-choose="file" data-target="cmSource" data-config="character_notes.source">选择</button></div>
               </label>
               <label class="field full">输出目录
-                <div class="file-row"><input id="cmOutputDir" placeholder="自动生成 / 选择目录" /><button class="pixel-btn" data-choose="folder" data-target="cmOutputDir" data-config="character_material.outputDir">选择</button></div>
+                <div class="file-row"><input id="cmOutputDir" placeholder="自动生成 / 选择目录" /><button class="pixel-btn" data-choose="folder" data-target="cmOutputDir" data-config="character_notes.outputDir">选择</button></div>
               </label>
               <label>模型平台 <select id="cmPlatform"><option value="deepseek">DeepSeek</option><option value="openai">OpenAI</option><option value="local">本地</option></select></label>
               <label>API Key <input id="cmApiKey" type="password" placeholder="可留空，读取环境变量" /></label>
@@ -269,26 +269,26 @@
               <label><input type="checkbox" id="cmConcurrent" checked /> 并发抽取</label>
             </div>
             <div class="action-grid two-buttons">
-              <button class="pixel-btn primary" data-run="character_material">开始抽取</button>
-              <button class="pixel-btn" data-run="character_material_stop">停止抽取</button>
+              <button class="pixel-btn primary" data-run="character_notes">开始抽取</button>
+              <button class="pixel-btn" data-run="character_notes_stop">停止抽取</button>
             </div>
           </article>
         </section>
 
-        <section class="view-panel" data-panel="current_plot">
+        <section class="view-panel" data-panel="plot_notes">
           <article class="pixel-card form-card">
             <div class="form-grid">
               <label class="field full">小说
-                <div class="file-row"><input id="cpSource" placeholder="选择完整小说" /><button class="pixel-btn" data-choose="file" data-target="cpSource" data-config="current_plot.source">选择</button></div>
+                <div class="file-row"><input id="cpSource" placeholder="选择完整小说" /><button class="pixel-btn" data-choose="file" data-target="cpSource" data-config="plot_notes.source">选择</button></div>
               </label>
               <label class="field full">已有当前剧情
-                <div class="file-row"><input id="cpCurrentPlotFile" placeholder="选择已有当前剧情" /><button class="pixel-btn" data-choose="file" data-target="cpCurrentPlotFile" data-config="current_plot.currentPlotFile">选择</button></div>
+                <div class="file-row"><input id="cpPlotNotesFile" placeholder="选择已有当前剧情" /><button class="pixel-btn" data-choose="file" data-target="cpPlotNotesFile" data-config="plot_notes.plotNotesFile">选择</button></div>
               </label>
               <label class="field full">输出目录
-                <div class="file-row"><input id="cpOutputDir" placeholder="自动生成 / 选择目录" /><button class="pixel-btn" data-choose="folder" data-target="cpOutputDir" data-config="current_plot.outputDir">选择</button></div>
+                <div class="file-row"><input id="cpOutputDir" placeholder="自动生成 / 选择目录" /><button class="pixel-btn" data-choose="folder" data-target="cpOutputDir" data-config="plot_notes.outputDir">选择</button></div>
               </label>
               <label class="field full">输出文件
-                <div class="file-row"><input id="cpOutputFile" placeholder="自动命名 / 选择输出文件" /><button class="pixel-btn" data-choose="save" data-target="cpOutputFile" data-config="current_plot.outputFile">选择</button></div>
+                <div class="file-row"><input id="cpOutputFile" placeholder="自动命名 / 选择输出文件" /><button class="pixel-btn" data-choose="save" data-target="cpOutputFile" data-config="plot_notes.outputFile">选择</button></div>
               </label>
               <label>模型配置 <select id="cpPlatform"><option value="deepseek">DeepSeek</option><option value="openai">OpenAI</option><option value="local">本地</option></select></label>
               <label>API Key <input id="cpApiKey" type="password" placeholder="可留空，读取环境变量" /></label>
@@ -306,10 +306,10 @@
             </div>
             <div class="option-grid two"><label><input type="checkbox" id="cpReplaceExisting" checked /> 覆盖已有章节摘要</label></div>
             <div class="action-grid">
-              <button class="pixel-btn" data-run="current_plot" data-scope="single">总结单章</button>
-              <button class="pixel-btn" data-run="current_plot" data-scope="around">总结前后</button>
-              <button class="pixel-btn primary" data-run="current_plot" data-scope="range">总结范围</button>
-              <button class="pixel-btn" data-run="current_plot_stop">停止总结</button>
+              <button class="pixel-btn" data-run="plot_notes" data-scope="single">总结单章</button>
+              <button class="pixel-btn" data-run="plot_notes" data-scope="around">总结前后</button>
+              <button class="pixel-btn primary" data-run="plot_notes" data-scope="range">总结范围</button>
+              <button class="pixel-btn" data-run="plot_notes_stop">停止总结</button>
             </div>
           </article>
         </section>

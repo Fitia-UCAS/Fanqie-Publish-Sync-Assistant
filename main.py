@@ -10,10 +10,10 @@ try:
 except Exception as exc:  # pragma: no cover - depends on local desktop env
     raise SystemExit("缺少依赖：pywebview。请先执行：pip install -r requirements.txt") from exc
 
-from backend.api.webview_api import WebviewApi
-from backend.shared.app.app_data_reset import reset_runtime_data
-from backend.shared.app.app_logging import setup_logging
-from backend.shared.app.app_paths import ensure_data_directories
+from backend.api.webview import WebviewRouter
+from backend.data_reset import reset_runtime_data
+from backend.log_setup import setup_logging
+from backend.paths import ensure_data_directories
 
 WINDOW_TITLE = "番茄发布与同步助手"
 WINDOW_MIN_SIZE = (1180, 760)
@@ -44,7 +44,7 @@ def maximize_window(window: Any) -> None:
         return
 
 
-def create_app_window(html_path: str, api: WebviewApi) -> Any:
+def create_app_window(html_path: str, api: WebviewRouter) -> Any:
     """Create the pywebview window with compatibility for older pywebview builds.
 
     Some local pywebview versions do not accept optional keyword arguments such as
@@ -77,7 +77,7 @@ def main() -> None:
     setup_logging()
     base_dir = Path(__file__).resolve().parent
     html_path = "file://" + str(base_dir / "frontend" / "index.html").replace(os.sep, "/")
-    api = WebviewApi()
+    api = WebviewRouter()
     window = create_app_window(html_path, api)
     api.bind_window(window)
     webview.start(maximize_window, window)

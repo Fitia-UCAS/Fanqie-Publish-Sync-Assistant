@@ -1,10 +1,29 @@
 __pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-data/
 build/
 dist/
+*.spec
 
-config/config.json
+# Local runtime state, secrets, browser sessions, logs and generated artifacts.
+data/settings/
+data/secrets/
+data/auth/
+data/runtime/
+data/runs/
+data/workspaces/
+data/**/tasklogs/
+data/**/debug/
+data/**/backups/
+data/**/compare_reports/
+data/**/history/
+data/**/outputs/
+data/**/tracker/
+data/**/chapters/
 data/fanqie_web/state.json
+data/fanqie_web/accounts.json
 
-Fanqie-Publish-Sync-Assistant.spec
+Fanqie-Publish-Sync-Assistant.zip

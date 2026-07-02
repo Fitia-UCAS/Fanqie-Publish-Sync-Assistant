@@ -11,7 +11,7 @@ PROJECT_DIR_NAME = "Fanqie-Publish-Sync-Assistant"
 def ensure_state_json(project_dir: Path) -> None:
     script_dir = Path(__file__).resolve().parent
     src = script_dir / "state.json"
-    dst = project_dir / "data" / "fanqie_web" / "state.json"
+    dst = project_dir / "data" / "auth" / "fanqie" / "default" / "state.json"
 
     if not src.exists():
         print("[警告] 启动脚本同级目录下未找到 state.json，跳过复制。")

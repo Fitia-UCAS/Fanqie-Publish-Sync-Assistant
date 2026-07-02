@@ -5,6 +5,15 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = ROOT_DIR / "backend"
+BUSINESS_PACKAGES = (
+    "backend.story_analysis",
+    "backend.crawling",
+    "backend.fanqie_web",
+    "backend.novel",
+    "backend.publishing",
+    "backend.syncing",
+    "backend.tasks",
+)
 
 
 def _backend_imports() -> list[tuple[str, str]]:
@@ -24,21 +33,20 @@ def _backend_imports() -> list[tuple[str, str]]:
     return edges
 
 
-def test_shared_and_models_do_not_depend_on_outer_layers() -> None:
+def test_business_packages_do_not_depend_on_api_or_actions() -> None:
     for source, target in _backend_imports():
-        if source.startswith("backend.shared"):
-            assert target.startswith("backend.shared"), f"{source} must not import {target}"
-        if source.startswith("backend.models"):
-            assert target.startswith(("backend.shared", "backend.models")), f"{source} must not import {target}"
+        if source.startswith(BUSINESS_PACKAGES):
+            assert not target.startswith(("backend.api", "backend.actions")), f"{source} must not import {target}"
 
 
-def test_services_do_not_depend_on_workflows_api_or_external_adapters() -> None:
+def test_actions_orchestrate_business_packages_directly() -> None:
+    action_imports = [target for source, target in _backend_imports() if source.startswith("backend.actions")]
+    assert any(target.startswith("backend.publishing.flow") for target in action_imports)
+    assert any(target.startswith("backend.syncing.flow") for target in action_imports)
+    assert any(target.startswith("backend.crawling") for target in action_imports)
+
+
+def test_removed_architecture_layers_are_absent() -> None:
     for source, target in _backend_imports():
-        if source.startswith("backend.services"):
-            assert not target.startswith(("backend.workflows", "backend.api", "backend.adapters")), f"{source} must not import {target}"
-
-
-def test_adapters_do_not_depend_on_workflows_or_api() -> None:
-    for source, target in _backend_imports():
-        if source.startswith("backend.adapters"):
-            assert not target.startswith(("backend.workflows", "backend.api")), f"{source} must not import {target}"
+        assert not target.startswith(("backend.core", "backend.domain", "backend.features", "backend.integrations", "backend.workflows")), f"{source} imports {target}"
+        assert target != "backend.fanqie" and not target.startswith("backend.fanqie."), f"{source} imports {target}"

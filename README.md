@@ -52,7 +52,7 @@ FANQIE Novel PUBLISH SYNC ASSISTANT | FANQIE Novel PUBLISHing
 FANQIE Novel PUBLISH SYNC ASSISTANT | Fanqie Syncing
 FANQIE Novel PUBLISH SYNC ASSISTANT | Novel Processing
 FANQIE Novel PUBLISH SYNC ASSISTANT | Web Crawling
-FANQIE Novel PUBLISH SYNC ASSISTANT | Character Material
+FANQIE Novel PUBLISH SYNC ASSISTANT | Character Notes
 FANQIE Novel PUBLISH SYNC ASSISTANT | Current Plot
 ```
 
@@ -62,7 +62,7 @@ More specifically:
 * **Fanqie Syncing**: compares local chapters with web chapters and catches differences when something does not match.
 * **Novel Processing**: organizes TXT files, detects chapters, formats text, and splits novels by chapter, chapter count, file size, or line count.
 * **Web Crawling**: fetches chapters, saves them as TXT, and cleans up the messy stuff along the way.
-* **Character Material**: organizes character materials and helps turn them into reusable prompt-ready notes.
+* **Character Notes**: organizes character notes and helps turn them into reusable prompt-ready notes.
 * **Current Plot**: manages current-plot context files so the next chapter can stay aligned with what is happening now.
 
 That is pretty much it.
@@ -250,3 +250,40 @@ python main.py
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:7F00FF,45:DD2476,100:FF512F&height=120&section=footer" alt="footer" />
 
 </div>
+
+---
+
+## 当前后端结构
+
+```txt
+backend/
+  api/             # pywebview 暴露给桌面端/前端的入口层
+  actions/         # 前端按钮触发的场景入口：发布、同步、抓取、清洗、拆分
+  publishing/      # 发布流程：本地章节读取、打开编辑器、提交、结果记录
+  syncing/         # 同步流程：远端目录、差异检查、覆盖应用、结果记录
+  crawling/        # 网页抓取、限流、站点适配和 TXT 写出
+  fanqie_web/      # 番茄网页端 Playwright 操作和平台字数规则
+  novel/           # 小说章节、正文清洗、格式化、切分和本地 TXT 改写
+  story_analysis/  # 剧情/角色分析：角色语料抽取、当前剧情摘要、LLM 提示词
+  tasks/           # 任务回调、事件、运行结果和前端日志摘要
+```
+
+依赖方向：`api -> actions -> 业务目录 / fanqie_web`。业务目录不反向依赖 `api` 或 `actions`，这条规则由测试保护。
+
+本地数据统一放在 `data/` 下，并按责任拆分：
+
+```txt
+data/
+  settings/          # 应用设置、工作流默认值、最近输入
+  secrets/           # 本地密钥，不提交、不打包
+  auth/              # 番茄账号与浏览器登录态，不提交、不打包
+  runtime/           # 浏览器运行态
+  system/            # 应用级日志和调试产物
+  publishing/        # 发布运行日志、备份、对比和快照
+  syncing/           # 同步运行日志、备份、对比和历史
+  crawling/          # 抓取输出、日志和备份
+  novel_processing/  # 小说整理/清洗/分割输出
+  story_analysis/    # 剧情/角色分析输出和章节缓存
+  workspaces/        # 小说项目、章节映射、项目内运行记录
+  runs/              # 全局运行索引
+```

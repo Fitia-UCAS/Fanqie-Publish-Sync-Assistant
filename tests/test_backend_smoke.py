@@ -8,9 +8,9 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from backend.services.service_chapter_formatter import format_chapters
-from backend.services.service_chapter_text_parser import parse_chapters, read_chapters
-from backend.shared.app.app_paths import get_state_paths
+from backend.novel.formatting import format_chapters
+from backend.novel.reader import parse_chapters, read_chapters
+from backend.paths import get_state_paths
 
 
 class ChapterParserTest(unittest.TestCase):
@@ -50,7 +50,7 @@ class ChapterParserTest(unittest.TestCase):
 class ProjectStructureTest(unittest.TestCase):
     def test_state_paths_exist(self) -> None:
         paths = get_state_paths()
-        self.assertIn("chapter_sync_compare", paths)
+        self.assertIn("syncing_compare", paths)
 
 
 
