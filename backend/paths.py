@@ -1,10 +1,26 @@
 from __future__ import annotations
 
+import os
+import sys
 from datetime import datetime
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT_DIR / "data"
+
+def _app_root_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parents[1]
+
+
+def _data_dir() -> Path:
+    custom_data_dir = os.environ.get("FANQIE_DATA_DIR")
+    if custom_data_dir:
+        return Path(custom_data_dir).expanduser().resolve()
+    return ROOT_DIR / "data"
+
+
+ROOT_DIR = _app_root_dir()
+DATA_DIR = _data_dir()
 
 CONFIG_DIR = DATA_DIR / "settings"
 CONFIG_FILE = CONFIG_DIR / "app.json"
